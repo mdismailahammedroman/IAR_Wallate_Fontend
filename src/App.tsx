@@ -7,7 +7,7 @@ function App() {
   return (
     <>
       <h1>hello Iar digital wallet</h1>
-      <Button/>
+      <Button>click me</Button>
     </>
   )
 }
