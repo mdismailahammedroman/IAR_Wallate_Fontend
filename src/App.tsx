@@ -1,4 +1,6 @@
-import { Button } from "./components/ui/button"
+import { Outlet } from "react-router"
+import { CommonLayout } from "./components/Layout/CommonLayout"
+
 
 
 function App() {
@@ -6,9 +8,10 @@ function App() {
 
   return (
     <>
-      <h1>hello Iar digital wallet</h1>
-      <Button>click me</Button>
-    </>
+    <CommonLayout>
+      <Outlet></Outlet>
+    </CommonLayout>
+   </>
   )
 }
 
