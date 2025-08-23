@@ -1,4 +1,5 @@
-import { logo as WalletLogo } from "../../assets/Icon/walletLogo" //
+
+
 
 
 export const Footer = () => {
@@ -8,7 +9,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div>
             <div className="text-foreground">
-                          <WalletLogo />
+  
             </div>
 
         <p className="mt-4 max-w-xs text-gray-500">
