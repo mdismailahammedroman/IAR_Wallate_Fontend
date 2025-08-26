@@ -62,9 +62,9 @@ export const LoginForm = () => {
         <div className="w-full md:w-1/2 p-8">
           <motion.h2
             className="text-3xl font-bold text-center mb-6 text-indigo-700"
-            initial={{ x: -100 }}
+            initial={{ x: -200 }}
             animate={{ x: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
             Welcome Back!
           </motion.h2>

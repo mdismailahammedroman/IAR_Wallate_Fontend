@@ -1,13 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import Lottie from "react-lottie";
 import animationData from "../../assets/lottie/Wallet.json"; // Adjust path as needed
 import { z } from "zod";
-import { Link } from "react-router";
+import { Form, Link, useNavigate } from "react-router";
+import { toast } from "sonner";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import Password from "../ui/Password";
 
-// Zod schema
+
+// Zod schema for validation
 const registerSchema = z
   .object({
     name: z.string().min(2, "Name is required"),
@@ -22,24 +29,46 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-export const RegisterForm = () => {
+export function RegisterForm({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const { register, handleSubmit, formState: { errors }, } = useForm<RegisterFormData>({
+  const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 
-  const onSubmit = (data: RegisterFormData) => {
-    setIsSubmitting(true);
-    console.log("Registering:", data);
+  // Handle form submission
+const onSubmit = async (data: RegisterFormData) => {
+    console.log(data);
+    
+//   setIsSubmitting(true); // <-- Add this line
+//   const userInfo = {
+//     name: data.name,
+//     email: data.email,
+//     password: data.password,
+//   };
 
-    // Simulate API delay
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert("Registered successfully!");
-    }, 2000);
-  };
-
+//   try {
+//     await registerUser(userInfo);
+//     toast.success("User created successfully");
+//     navigate("/verify");
+//   } catch (error) {
+//     console.error("Error during registration:", error);
+//     toast.error("Registration failed, please try again.");
+//   } finally {
+//     setIsSubmitting(false);
+//   }
+};
+  // Lottie animation settings
   const defaultOptions = {
     loop: true,
     autoplay: true,
@@ -47,6 +76,19 @@ export const RegisterForm = () => {
     rendererSettings: {
       preserveAspectRatio: "xMidYMid slice",
     },
+  };
+
+  // Fake API call for demonstration
+  const registerUser = async (userInfo: { name: string; email: string; password: string }) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (userInfo.email === "error@example.com") {
+          reject(new Error("Registration failed"));
+        } else {
+          resolve("User registered");
+        }
+      }, 2000);
+    });
   };
 
   return (
@@ -68,72 +110,122 @@ export const RegisterForm = () => {
             Create Your Wallet Account
           </motion.h2>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name */}
-            <motion.input
-              type="text"
-              placeholder="Full Name"
-              {...register("name")}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              initial={{ x: -200 }}
-              animate={{ x: 0 }}
-              transition={{ duration: 0.3 }}
-            />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+          {/* React Hook Form */}
+        <FormProvider  {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <motion.div
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormDescription className="sr-only">
+                        Your public display name.
+                      </FormDescription>
+                      <FormMessage className="text-red-500 text-sm" />
+                    </FormItem>
+                  )}
+                />
+              </motion.div>
 
-            {/* Email */}
-            <motion.input
-              type="email"
-              placeholder="Email"
-              {...register("email")}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              initial={{ x: -200 }}
-              animate={{ x: 0 }}
-              transition={{ duration: 0.4 }}
-            />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+              {/* Email Field */}
+              <motion.div
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="john.doe@company.com" type="email" {...field} />
+                      </FormControl>
+                      <FormDescription className="sr-only">
+                        Your email address.
+                      </FormDescription>
+                      <FormMessage className="text-red-500 text-sm" />
+                    </FormItem>
+                  )}
+                />
+              </motion.div>
 
-            {/* Password */}
-            <motion.input
-              type="password"
-              placeholder="Password"
-              {...register("password")}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              initial={{ x: -200 }}
-              animate={{ x: 0 }}
-              transition={{ duration: 0.5 }}
-            />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+              {/* Password Field */}
+              <motion.div
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.6 }}
+              >
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Password {...field} />
+                      </FormControl>
+                      <FormDescription className="sr-only">
+                        Your password.
+                      </FormDescription>
+                      <FormMessage className="text-red-500 text-sm" />
+                    </FormItem>
+                  )}
+                />
+              </motion.div>
 
-            {/* Confirm Password */}
-            <motion.input
-              type="password"
-              placeholder="Confirm Password"
-              {...register("confirmPassword")}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              initial={{ x: -200 }}
-              animate={{ x: 0 }}
-              transition={{ duration: 0.6 }}
-            />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
-            )}
+              {/* Confirm Password Field */}
+              <motion.div
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.7 }}
+              >
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Password {...field} />
+                      </FormControl>
+                      <FormDescription className="sr-only">
+                        Confirm your password.
+                      </FormDescription>
+                      <FormMessage className="text-red-500 text-sm" />
+                    </FormItem>
+                  )}
+                />
+              </motion.div>
 
-            <motion.button
-              type="submit"
-              className="w-full p-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-              initial={{ y: 50 }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.7 }}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Registering..." : "Register"}
-            </motion.button>
-          </form>
+              {/* Submit Button */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8 }}
+              >
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Registering..." : "Register"}
+                </Button>
+              </motion.div>
+            </form>
+          </FormProvider>
 
           <p className="text-center text-sm mt-4">
             Already have an account?{" "}
-            <Link to={"/login"} className="text-indigo-600 cursor-pointer">Log In</Link>
+            <Link to={"/login"} className="text-indigo-600 cursor-pointer">
+              Log In
+            </Link>
           </p>
         </div>
 
@@ -144,4 +236,4 @@ export const RegisterForm = () => {
       </div>
     </motion.div>
   );
-};
+}
