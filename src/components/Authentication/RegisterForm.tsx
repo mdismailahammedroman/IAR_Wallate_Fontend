@@ -78,18 +78,6 @@ const onSubmit = async (data: RegisterFormData) => {
     },
   };
 
-  // Fake API call for demonstration
-  const registerUser = async (userInfo: { name: string; email: string; password: string }) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (userInfo.email === "error@example.com") {
-          reject(new Error("Registration failed"));
-        } else {
-          resolve("User registered");
-        }
-      }, 2000);
-    });
-  };
 
   return (
     <motion.div
