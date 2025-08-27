@@ -1,4 +1,7 @@
 import App from "@/App";
+import { LoginForm } from "@/components/Authentication/LoginForm";
+import { RegisterForm } from "@/components/Authentication/RegisterForm";
+
 import { About } from "@/pages/About/About";
 import { Contact } from "@/pages/home/Contact";
 import { FAQ } from "@/pages/home/Faq";
@@ -22,7 +25,15 @@ const router=createBrowserRouter([
       { path: "faq", element: <FAQ /> },
     ],
     },
-    
+    {
+        Component:LoginForm,
+        path:"/login"
+    },
+    {
+        Component:RegisterForm,
+        path:"/register"
+    },
+   
    
 ])
 export default router;
