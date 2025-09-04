@@ -97,10 +97,10 @@ export default function Navbar() {
         {/* Right side buttons */}
         <div className="hidden md:flex gap-3 items-center">
           <Button variant="ghost" asChild>
-            <Link to="/signin">Sign In</Link>
+            <Link to="/login">Sign In</Link>
           </Button>
           <Button asChild>
-            <Link to="/signup">Get Started</Link>
+            <Link to="/signup">Sign Up</Link>
           </Button>
           <ModeToggle />
         </div>

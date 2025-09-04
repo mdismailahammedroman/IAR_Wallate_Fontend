@@ -64,7 +64,7 @@ export const Footer = () => {
                 <ul className="mt-6 space-y-4">
                   {section.items.map((item, idx) => (
                     <li key={idx}>
-                      <a href="#" className="text-secondary-foreground transition hover:text-secondary dark:hover:text-primary">
+                      <a href="#" className="text-oklch transition hover:text-secondary dark:hover:text-primary">
                         {item}
                       </a>
                     </li>
@@ -76,7 +76,7 @@ export const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <p className="text-xs text-foreground">
+        <p className="text-xs text-muted">
           &copy; 2025 Company Name. All rights reserved.
         </p>
       </div>

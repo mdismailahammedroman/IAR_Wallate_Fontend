@@ -11,36 +11,36 @@ import { Button } from "@/components/ui/button"
 
 const plans = [
   {
-    title: "Basic",
-    price: "Free",
+    title: "send money",
+    price: "$5",
     features: [
       "1 Wallet",
       "Send & Receive Payments",
       "Basic History",
     ],
-    cta: "Start Free",
+    cta: "Per taransaction",
     popular: false,
   },
   {
-    title: "Pro",
-    price: "$9.99/mo",
+    title: "Tranfer money",
+    price: "$10",
     features: [
-      "Up to 5 Wallets",
+      "wallet to bank",
       "Priority Support",
       "Advanced Analytics",
     ],
-    cta: "Upgrade to Pro",
+    cta: "Tranfer money",
     popular: true,
   },
   {
-    title: "Business",
-    price: "$29.99/mo",
+    title: "CASH OUT",
+    price: "$20",
     features: [
       "Unlimited Wallets",
       "Team Management",
       "Dedicated Support",
     ],
-    cta: "Contact Sales",
+    cta: "CASH OUT",
     popular: false,
   },
 ]

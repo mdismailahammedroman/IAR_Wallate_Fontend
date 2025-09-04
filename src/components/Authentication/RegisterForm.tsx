@@ -12,6 +12,7 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Password from "../ui/Password";
+import { useRegisterMutation } from "@/redux/features/auth/auth.api";
 
 
 // Zod schema for validation
@@ -29,12 +30,13 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+
 export function RegisterForm({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const [register] = useRegisterMutation();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -43,31 +45,34 @@ export function RegisterForm({
       email: "",
       password: "",
       confirmPassword: "",
+
     },
   });
 
   // Handle form submission
-const onSubmit = async (data: RegisterFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     console.log(data);
-    
-//   setIsSubmitting(true); // <-- Add this line
-//   const userInfo = {
-//     name: data.name,
-//     email: data.email,
-//     password: data.password,
-//   };
 
-//   try {
-//     await registerUser(userInfo);
-//     toast.success("User created successfully");
-//     navigate("/verify");
-//   } catch (error) {
-//     console.error("Error during registration:", error);
-//     toast.error("Registration failed, please try again.");
-//   } finally {
-//     setIsSubmitting(false);
-//   }
-};
+    setIsSubmitting(true);
+    const userInfo = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    };
+
+    try {
+      const result=await register(userInfo).unwrap();
+      console.log(result);
+      
+      toast.success("User created successfully");
+
+    } catch (error) {
+      console.error("Error during registration:", error);
+      toast.error("Registration failed, please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   // Lottie animation settings
   const defaultOptions = {
     loop: true,
@@ -99,9 +104,9 @@ const onSubmit = async (data: RegisterFormData) => {
           </motion.h2>
 
           {/* React Hook Form */}
-        <FormProvider  {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <motion.div
+          <FormProvider  {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <motion.div
                 initial={{ x: -100, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.4 }}
