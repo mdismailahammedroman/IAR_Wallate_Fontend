@@ -11,6 +11,7 @@ import Pricing from "./Pricing";
 const HomePage = () => {
   return (
     <div className="max-w-7xl mx-auto">
+      
       <Hero />
       <Features />
       <Pricing />

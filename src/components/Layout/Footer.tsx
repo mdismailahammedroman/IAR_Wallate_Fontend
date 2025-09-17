@@ -1,3 +1,5 @@
+import { Facebook, Github,  Instagram, Linkedin, Twitter } from "lucide-react";
+
 export const Footer = () => {
   return (
    <footer className=" bg-primary dark:bg-gray-800 text-white dark:text-gray-300 py-8 px-6">
@@ -5,34 +7,31 @@ export const Footer = () => {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Branding & Description */}
           <div>
-            <div className="text-white font-bold text-lg">Company Name</div>
+            <div className="text-white font-bold text-lg">IAR-WalletPro</div>
 
             <p className="mt-4 max-w-xs text-primary-foreground">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse non cupiditate quae nam
-              molestias.
+        Tap, Pay, Done. Fast!
             </p>
 
             {/* Social Media Icons */}
             <ul className="mt-8 flex gap-6">
               {[
-                { label: 'Facebook' },
-                { label: 'Instagram' },
-                { label: 'Twitter' },
-                { label: 'GitHub' },
-                { label: 'Dribbble' }
+                { label: 'Facebook' , icon:<Facebook />},
+                { label: 'Instagram' , icon:<Instagram /> },
+                { label: 'Twitter',icon:<Twitter /> },
+                { label: 'GitHub', icon:<Github />  },
+                { label: 'Linkedin',icon:<Linkedin /> }
               ].map((item, index) => (
                 <li key={index}>
                   <a
                     href="#"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-muted-foreground transition hover:text-foreground"
+                    className="drak:text-muted-foreground transition hover:text-fuchsia-600"
                   >
                     <span className="sr-only">{item.label}</span>
                     {/* Replace with icon */}
-                    <svg className="size-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" />
-                    </svg>
+                    {item.icon}
                   </a>
                 </li>
               ))}
@@ -77,7 +76,7 @@ export const Footer = () => {
 
         {/* Copyright */}
         <p className="text-xs text-muted">
-          &copy; 2025 Company Name. All rights reserved.
+          &copy; 2025 IAR-WalletPro. All rights reserved.
         </p>
       </div>
     </footer>

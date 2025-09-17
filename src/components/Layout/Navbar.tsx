@@ -31,7 +31,7 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold hover:text-indigo-300">
-          WalletPro
+          IAR-WalletPro
         </Link>
 
         {/* Desktop nav */}
