@@ -84,7 +84,7 @@ export const Verify = () => {
       if (!email) {
         navigate("/");
       }
-    }, [email]);
+    }, [email, navigate]);
 
   useEffect(() => {
     if (!email || !confirmed) {
