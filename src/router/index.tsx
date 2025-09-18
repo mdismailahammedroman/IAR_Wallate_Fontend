@@ -8,6 +8,7 @@ import { FAQ } from "@/pages/home/Faq";
 import { Features } from "@/pages/home/Features";
 import HomePage from "@/pages/home/HomePage";
 import Pricing from "@/pages/home/Pricing";
+import { Verify } from "@/pages/user/Verify";
 
 import { createBrowserRouter } from "react-router";
 
@@ -32,6 +33,10 @@ const router=createBrowserRouter([
     {
         Component:RegisterForm,
         path:"/register"
+    },
+    {
+        Component:Verify,
+        path:"/verify"
     },
    
    

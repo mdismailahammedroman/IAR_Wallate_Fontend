@@ -1,0 +1,1 @@
+export type {IResponse,ILoginPayload,ILoginRespons,IRegisterPayload,IsendOtp, ApiError, IverifyOtp} from "@/types/auth.types"

@@ -1,13 +1,15 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import Lottie from "react-lottie";
-import animationData from "../../assets/lottie/loading1.json"; // Path to your Lottie animation JSON
+import animationData from "../../assets/lottie/loading1.json";
+import { useForm, type SubmitHandler,  } from "react-hook-form";
+import { useLoginMutation } from "@/redux/features/auth/auth.api";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router";
+import { z } from "zod";
+import { Link, useNavigate } from "react-router";
+import Lottie from "react-lottie";
 
-// Zod schema for validation
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
@@ -15,35 +17,50 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export const LoginForm = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Use react-hook-form with Zod validation
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
+export const LoginForm = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "mirhussainmurtaza@gmail.com",
+      password: "12345678",
+    },
   });
 
-  const handleLoginSubmit = (data: LoginFormData) => {
-    setIsSubmitting(true);
-    console.log("Logging in with:", data);
-    // Add your API call for login here
-    setTimeout(() => {
-      setIsSubmitting(false);
-    }, 2000);
-  };
+  const [login] = useLoginMutation();
+
+const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+  try {
+    const res = await login(data).unwrap();
+    if (res.success) {
+      toast.success("Logged in successfully");
+      navigate("/");
+    }
+  } catch (err: any) {
+    console.error("Login error:", err);
+
+    const message = err?.data?.message;
+    if (message === "Password does not match") {
+      toast.error("Invalid credentials");
+    } else if (message === "User is not verified") {
+      toast.error("Your account is not verified");
+      console.log("Navigating to /verify with email:", data.email);
+      navigate("/verify", { state: data.email });  // Pass email to /verify
+    } else {
+      toast.error("Something went wrong");
+    }
+  }
+};
 
   const defaultOptions = {
     loop: true,
     autoplay: true,
-    animationData: animationData,
+    animationData,
     rendererSettings: {
       preserveAspectRatio: "xMidYMid slice",
     },
   };
+
 
   return (
     <motion.div
@@ -53,12 +70,10 @@ export const LoginForm = () => {
       className="h-screen bg-gray-100 flex items-center justify-center"
     >
       <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-xl max-w-4xl overflow-hidden">
-        {/* Lottie Animation */}
         <div className="w-full md:w-1/2 p-4">
           <Lottie options={defaultOptions} height={400} width={400} />
         </div>
 
-        {/* Login Form */}
         <div className="w-full md:w-1/2 p-8">
           <motion.h2
             className="text-3xl font-bold text-center mb-6 text-indigo-700"
@@ -69,7 +84,7 @@ export const LoginForm = () => {
             Welcome Back!
           </motion.h2>
 
-          <form onSubmit={handleSubmit(handleLoginSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <motion.input
               type="email"
               placeholder="Email"
@@ -110,7 +125,9 @@ export const LoginForm = () => {
 
           <p className="text-center text-sm mt-4">
             Don't have an account?{" "}
-            <Link to={"/register"} className="text-indigo-600 cursor-pointer">Sign Up</Link>
+            <Link to="/register" className="text-indigo-600 cursor-pointer">
+              Sign Up
+            </Link>
           </p>
         </div>
       </div>

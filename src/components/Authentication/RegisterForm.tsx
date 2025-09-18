@@ -1,25 +1,26 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import Lottie from "react-lottie";
 import animationData from "../../assets/lottie/Wallet.json"; // Adjust path as needed
 import { z } from "zod";
-import { Form, Link, useNavigate } from "react-router";
-import { toast } from "sonner";
+import { Link, useNavigate } from "react-router";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Password from "../ui/Password";
 import { useRegisterMutation } from "@/redux/features/auth/auth.api";
+import { toast } from "sonner";
+import Lottie from "react-lottie";
 
 
 // Zod schema for validation
 const registerSchema = z
   .object({
     name: z.string().min(2, "Name is required"),
-    email: z.string().email("Enter a valid email"),
+    email: z.email("Enter a valid email"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Confirm password is required"),
   })
@@ -37,6 +38,7 @@ export function RegisterForm({
 }: React.HTMLAttributes<HTMLDivElement>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [register] = useRegisterMutation();
+  const navigate=useNavigate()
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -50,29 +52,38 @@ export function RegisterForm({
   });
 
   // Handle form submission
-  const onSubmit = async (data: RegisterFormData) => {
-    console.log(data);
+const onSubmit = async (data: RegisterFormData) => {
+  setIsSubmitting(true);
 
-    setIsSubmitting(true);
-    const userInfo = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    };
+const userInfo = {
+  name: data.name.trim(),
+  email: data.email.trim().toLowerCase(),
+  password: data.password,
+  confirmPassword:data.confirmPassword,
+  
+};
 
-    try {
-      const result=await register(userInfo).unwrap();
-      console.log(result);
-      
-      toast.success("User created successfully");
 
-    } catch (error) {
-      console.error("Error during registration:", error);
+  console.log("Sending userInfo:", userInfo);
+
+  try {
+    const result = await register(userInfo).unwrap();
+    console.log("Register response:", result);
+    toast.success("User created successfully");
+    navigate("/verify", { state: data.email }); // or any method you pick
+  } catch (error: any) {
+    console.error("Error during registration:", error);
+    // inspect error
+    if (error?.data?.message) {
+      toast.error("Registration failed: " + error.data.message);
+    } else {
       toast.error("Registration failed, please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+}
+
   // Lottie animation settings
   const defaultOptions = {
     loop: true,
