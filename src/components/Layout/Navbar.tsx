@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 
 import { ModeToggle } from "./mode.toggle"
 import { Link, NavLink } from "react-router"
+import { authApi, useLogoutMutation, useUserInfoQuery } from "@/redux/features/auth/auth.api"
+import { useDispatch } from "react-redux"
 
 const routes = [
   { href: "/", label: "Home" },
@@ -26,8 +28,18 @@ const routes = [
 ]
 
 export default function Navbar() {
+  const { data } = useUserInfoQuery(undefined);
+  const [logout] = useLogoutMutation();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    await logout(undefined);
+    dispatch(authApi.util.resetApiState());
+  };
+
+
   return (
-   <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-900 text-white dark:text-gray-200 shadow-md">
+    <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-900 text-white dark:text-gray-200 shadow-md">
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold hover:text-indigo-300">
@@ -95,15 +107,25 @@ export default function Navbar() {
         </div>
 
         {/* Right side buttons */}
-        <div className="hidden md:flex gap-3 items-center">
-          <Button variant="ghost" asChild>
-            <Link to="/login">Sign In</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/signup">Sign Up</Link>
-          </Button>
-          <ModeToggle />
-        </div>
+       <div className="hidden md:flex gap-3 items-center">
+  {!data?.data?.email ? (
+    <>
+      <Button variant="ghost" asChild>
+        <Link to="/login">Sign In</Link>
+      </Button>
+      <Button asChild>
+        <Link to="/register">Sign Up</Link>
+      </Button>
+    </>
+  ) : (
+    <Button onClick={handleLogout}>
+      Sign Out
+    </Button>
+  )}
+
+  <ModeToggle />
+</div>
+
       </nav>
     </header>
   )

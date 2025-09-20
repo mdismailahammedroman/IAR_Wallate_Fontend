@@ -12,7 +12,7 @@ export const Testimonials = () => {
       <h2 className="text-3xl font-bold mb-10 text-foreground dark:text-dark-foreground">
         What Our Clients Say
       </h2>
-      <div className="flex justify-center gap-10">
+      <div className="lg:flex justify-center grid-cols-1 gap-10">
         {testimonials.map((testimonial, index) => (
           <motion.div
             key={index}

@@ -129,7 +129,7 @@ const userInfo = {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input className="text-gray-800 border-gray-300" placeholder="John Doe" {...field} />
                       </FormControl>
                       <FormDescription className="sr-only">
                         Your public display name.
@@ -153,7 +153,7 @@ const userInfo = {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="john.doe@company.com" type="email" {...field} />
+                        <Input className="text-gray-800 border-gray-300" placeholder="john.doe@company.com" type="email" {...field} />
                       </FormControl>
                       <FormDescription className="sr-only">
                         Your email address.
@@ -177,7 +177,7 @@ const userInfo = {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Password {...field} />
+                        <Password className="text-gray-800 border-gray-300" {...field} />
                       </FormControl>
                       <FormDescription className="sr-only">
                         Your password.
@@ -201,7 +201,7 @@ const userInfo = {
                     <FormItem>
                       <FormLabel>Confirm Password</FormLabel>
                       <FormControl>
-                        <Password {...field} />
+                        <Password className="text-gray-800 border-gray-300" {...field} />
                       </FormControl>
                       <FormDescription className="sr-only">
                         Confirm your password.
@@ -225,7 +225,7 @@ const userInfo = {
             </form>
           </FormProvider>
 
-          <p className="text-center text-sm mt-4">
+          <p className="text-center text-sm mt-4 text-gray-800">
             Already have an account?{" "}
             <Link to={"/login"} className="text-indigo-600 cursor-pointer">
               Log In

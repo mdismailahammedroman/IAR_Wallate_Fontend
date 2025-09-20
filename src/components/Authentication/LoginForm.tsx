@@ -44,7 +44,7 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
       toast.error("Invalid credentials");
     } else if (message === "User is not verified") {
       toast.error("Your account is not verified");
-      console.log("Navigating to /verify with email:", data.email);
+      // console.log("Navigating to /verify with email:", data.email);
       navigate("/verify", { state: data.email });  // Pass email to /verify
     } else {
       toast.error("Something went wrong");
@@ -89,7 +89,7 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
               type="email"
               placeholder="Email"
               {...register("email")}
-              className="w-full p-3 border border-gray-300 rounded-lg"
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
               initial={{ x: -200 }}
               animate={{ x: 0 }}
               transition={{ duration: 0.5 }}
@@ -102,7 +102,7 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
               type="password"
               placeholder="Password"
               {...register("password")}
-              className="w-full p-3 border border-gray-300 rounded-lg"
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
               initial={{ x: -200 }}
               animate={{ x: 0 }}
               transition={{ duration: 0.6 }}
@@ -123,7 +123,7 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
             </motion.button>
           </form>
 
-          <p className="text-center text-sm mt-4">
+          <p className="text-center text-sm mt-4 text-gray-800">
             Don't have an account?{" "}
             <Link to="/register" className="text-indigo-600 cursor-pointer">
               Sign Up
