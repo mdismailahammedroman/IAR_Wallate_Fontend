@@ -5,9 +5,9 @@ import Sara from '../../assets/about/Sara Lee.jpeg';
 
 export const About = () => {
   return (
-    <div className="max-w-7xl mx-auto py-12 px-6">
+    <div className="max-w-7xl mx-auto py-12">
       {/* Service Story */}
-      <section className="mb-20 text-center">
+      <section className="mb-20 text-center p-10">
         <motion.h2
           className="text-3xl font-bold mb-4"
           initial={{ opacity: 0, y: -50 }}
@@ -17,7 +17,7 @@ export const About = () => {
           Our Service Story
         </motion.h2>
         <motion.p
-          className="text-lg text-muted-foreground"
+          className="text-lg text-muted-foreground px-20 "
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2 }}
@@ -38,7 +38,7 @@ export const About = () => {
           Our Mission
         </motion.h2>
         <motion.p
-          className="text-lg"
+          className="text-lg px-20"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2 }}

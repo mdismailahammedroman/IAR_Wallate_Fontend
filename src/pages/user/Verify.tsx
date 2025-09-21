@@ -69,6 +69,7 @@ export const Verify = () => {
       if (res.success) {
         toast.success("OTP Verified", { id: toastId });
         setConfirmed(true);
+        navigate("/dashboard");
       }
     } catch (error) {
 

@@ -1,5 +1,4 @@
 
-import { Features } from "./Features";
 import { Stats } from "./Stats";
 import { Testimonials } from "./Testimonials";
 import { CTA } from "./CTA";
@@ -13,7 +12,6 @@ const HomePage = () => {
     <div className="max-w-7xl mx-auto">
       
       <Hero />
-      <Features />
       <Pricing />
       <Stats />
       <CTA />
