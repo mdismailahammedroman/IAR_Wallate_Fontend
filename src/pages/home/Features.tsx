@@ -8,7 +8,7 @@ export const Features = () => {
   ];
 
   return (
-    <section className="py-20 bg-border text-center">
+    <section className="py-20 bg-border text-center mx-auto max-w-7xl">
       <h2 className="text-3xl font-bold mb-10 text-foreground"> Features</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 m-10">
         {featureList.map((feature, index) => (

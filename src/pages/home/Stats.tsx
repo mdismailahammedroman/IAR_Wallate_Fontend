@@ -2,7 +2,7 @@ import { motion } from "framer-motion"
 
 export const Stats = () => {
   return (
-    <section className="py-20 bg-background dark:bg-muted-foreground text-center">
+    <section className="py-20 bg-gray-300 dark:bg-muted-foreground text-center">
       <h2 className="text-3xl font-bold mb-10 text-gray-800">Our Impact</h2>
       <div className="lg:flex justify-around grid-cols-1 gap-3">
         <motion.div
