@@ -3,7 +3,11 @@ export interface IRegisterPayload {
   name: string;
   email: string;
   password: string;
+  confirmPassword: string;
+  role: "USER" | "AGENT";
 }
+
+
 
 export interface ILoginPayload {
   email: string
@@ -68,3 +72,6 @@ export interface ApiError {
     [key: string]: any;
   };
 }
+
+
+

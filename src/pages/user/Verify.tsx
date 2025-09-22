@@ -68,8 +68,12 @@ export const Verify = () => {
       const res = await verifyOtp(userInfo).unwrap();
       if (res.success) {
         toast.success("OTP Verified", { id: toastId });
+        
         setConfirmed(true);
-        navigate("/dashboard");
+              localStorage.setItem("isVerified", "true");
+
+      // ✅ Redirect and prevent back
+      navigate("/dashboard", { replace: true })
       }
     } catch (error) {
 

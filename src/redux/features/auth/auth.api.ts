@@ -11,9 +11,16 @@ import type {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    register: builder.mutation<IResponse<ILoginAndRegister>, IRegisterPayload>({
+    userRegister: builder.mutation<IResponse<ILoginAndRegister>, IRegisterPayload>({
       query: (userInfo) => ({
         url: "/user/register",
+        method: "POST",
+        data: userInfo,
+      }),
+    }),
+    agentRegister: builder.mutation<IResponse<ILoginAndRegister>, IRegisterPayload>({
+      query: (userInfo) => ({
+        url: "/agent/agent-register",
         method: "POST",
         data: userInfo,
       }),
@@ -57,7 +64,8 @@ export const authApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useRegisterMutation,
+  useUserRegisterMutation,
+  useAgentRegisterMutation,
   useLoginMutation,
   useLogoutMutation,
   useSendOtpMutation,

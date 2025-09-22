@@ -16,6 +16,7 @@ import {
 } from "@/redux/features/auth/auth.api";
 import { useDispatch } from "react-redux";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { RoleSelectionModal } from "../Authentication/RoleSelectionModal";
 
 const links = [
   { path: "/", label: "Home" },
@@ -92,12 +93,9 @@ export default function Navbar() {
                 <div className="mt-6 border-t pt-4">
                   {!data?.data?.email ? (
                     <div className="flex flex-col-reverse sm:flex-row lg:flex-row gap-2">
-                      <Link to="/login" className="text-indigo-400 hover:underline">
-                        Sign In
-                      </Link>
-                      <Link to="/register" className="text-indigo-400 hover:underline">
-                        Sign Up
-                      </Link>
+                      <RoleSelectionModal action="login" />
+                      <RoleSelectionModal action="register" />
+
                     </div>
 
                   ) : (
@@ -122,22 +120,20 @@ export default function Navbar() {
         </div>
 
         {/* Right side - desktop auth buttons */}
-        <div className="hidden md:flex gap-3 items-center">
-          {!data?.data?.email ? (
-            <>
-              <Button variant="ghost" asChild>
-                <Link to="/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/register">Sign Up</Link>
-              </Button>
-            </>
-          ) : (
-            <Button onClick={handleLogout}>Sign Out</Button>
-          )}
+   {/* Right side - desktop auth buttons */}
+<div className="hidden md:flex gap-3 items-center">
+  {!data?.data?.email ? (
+    <>
+      <RoleSelectionModal action="login" />
+      <RoleSelectionModal action="register" />
+    </>
+  ) : (
+    <Button onClick={handleLogout}>Sign Out</Button>
+  )}
 
-          <ModeToggle />
-        </div>
+  <ModeToggle />
+</div>
+
       </nav>
     </header>
   );
