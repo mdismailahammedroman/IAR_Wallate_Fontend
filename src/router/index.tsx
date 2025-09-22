@@ -10,7 +10,7 @@ import { Contact } from "@/pages/home/Contact";
 import { FAQ } from "@/pages/home/Faq";
 import HomePage from "@/pages/home/HomePage";
 import Pricing from "@/pages/home/Pricing";
-import { UserGetMe } from "@/pages/user/UserGetMe";
+import { UserGetMe } from "@/pages/user/UserProfile";
 import { Verify } from "@/pages/user/Verify";
 import { createBrowserRouter } from "react-router";
 
