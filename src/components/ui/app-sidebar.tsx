@@ -13,39 +13,35 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router"
+import { getSidebarItems } from "@/utils/getSidebarItems"
+import { useUserInfoQuery } from "@/redux/features/auth/auth.api"
 
-// This is sample data.
-const data = {
-  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      items: [
-        {
-          title: "Analytics",
-          url: "#",
-        },
-        {
-          title: "get",
-          url: "#",
-        },
-      ],
-    },
-   
-  ],
-}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+    const { data:userData } = useUserInfoQuery(undefined);
+console.log("userdata", userData);
+
+
+  const userRole = userData?.data?.role?.toUpperCase();
+
+ const data = {
+  navMain: getSidebarItems(userRole),
+};
+
+ 
+
+
+
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-         <h2 className="text-2xl font-bold hover:text-indigo-300">
+        <h2 className="text-2xl font-bold hover:text-indigo-300">
           IAR-WalletPro
         </h2>
       </SidebarHeader>
       <SidebarContent>
-        {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
@@ -65,5 +61,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

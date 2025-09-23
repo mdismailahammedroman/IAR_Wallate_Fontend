@@ -4,15 +4,18 @@ import { RegisterForm } from "@/components/Authentication/RegisterForm";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
 
 import { About } from "@/pages/About/About";
-import { Analytics } from "@/pages/admin/Analytics";
-import { AgentGetMe } from "@/pages/Agent/AgentGetMe";
 import { Contact } from "@/pages/home/Contact";
 import { FAQ } from "@/pages/home/Faq";
 import HomePage from "@/pages/home/HomePage";
 import Pricing from "@/pages/home/Pricing";
-import { UserGetMe } from "@/pages/user/UserProfile";
 import { Verify } from "@/pages/user/Verify";
-import { createBrowserRouter } from "react-router";
+import { generateRoutes } from "@/utils/generateRoutes";
+import { createBrowserRouter, Navigate } from "react-router";
+import { userSidebarItems } from "./userSidebarItems";
+import { LoginForm } from "@/components/Authentication/LoginForm";
+import { agentSidebarItems } from "./agentSidebar";
+import { adminSidebarItems } from "./AdminSidebarItem";
+
 
 
 const router = createBrowserRouter([
@@ -31,30 +34,26 @@ const router = createBrowserRouter([
         Component: DashboardLayout,
         path: "/admin",
         children: [
-            {
-                element: <Analytics />,
-                path: "analytics"
-            },
+              { index: true, element: <Navigate to="/admin/analytics" /> },
+           ...generateRoutes(adminSidebarItems)
         ]
     },
     {
+        //  withAuth(DashboardLayout, role.AGENT as TRole),
         Component: DashboardLayout,
         path: "/agent",
         children: [
-            {
-                element: <AgentGetMe />,
-                path: "me"
-            },
+              { index: true, element: <Navigate to="/agent/me" /> },
+            ...generateRoutes(agentSidebarItems)
         ]
     },
     {
+        
         Component: DashboardLayout,
         path: "/user",
         children: [
-            {
-                element: <UserGetMe />,
-                path: "me"
-            },
+              { index: true, element: <Navigate to="/user/me" /> },
+ ...generateRoutes(userSidebarItems)
         ]
     },
   {
@@ -64,6 +63,10 @@ const router = createBrowserRouter([
 {
   path: "/agent/agent-register",
   element: <RegisterForm role="AGENT" />
+},
+{
+  path: "/auth/login",
+  element: <LoginForm  />
 },
 
 
@@ -75,3 +78,4 @@ const router = createBrowserRouter([
 
 ])
 export default router;
+

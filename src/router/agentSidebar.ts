@@ -1,14 +1,22 @@
-import { UserGetMe } from "@/pages/user/UserGetMe";
-import type { ISidebarItem } from "@/types/userAgent";
 
-export const userSidebarItems: ISidebarItem[] = [
+import { EditUserProfile } from "@/components/Authentication/EditUserProfile";
+import { UserProfile } from "@/pages/user/UserProfile";
+import type { ISidebarItem } from "@/types";
+
+
+export const agentSidebarItems: ISidebarItem[] = [
   {
-    title: "User",
+    title: "Agent",
     items: [
       {
         title: "My Wallet",
-        url: "/user/me",
-        component: UserGetMe ,
+        url: "me",
+        component: UserProfile,
+      },
+      {
+        title: "Update Profile",
+        url: "id",
+        component: EditUserProfile,
       },
     ],
   },

@@ -1,15 +1,40 @@
-import { UserGetMe } from "@/pages/user/UserProfile";
-import type { ISidebarItem } from "@/types/userAgent";
+
+
+import { UserProfile } from "@/pages/user/UserProfile";
+import type { ISidebarItem } from "@/types";
+
 
 export const userSidebarItems: ISidebarItem[] = [
-  {
-    title: "User",
+ {
+    title: "user",
     items: [
+   
       {
-        title: "My Wallet",
-        url: "/user/me",
-        component: UserGetMe ,
+        title: "Update Profile",
+        url: "me",
+        component: UserProfile,
+      },
+      {
+        title: "Update Profile",
+        url: "hello",
+        component: UserProfile,
+      },
+      {
+        title: "Update Profile",
+        url: "ismail",
+        component: UserProfile,
       },
     ],
   },
+  // {
+  //   title: "Profile",
+  //   items: [
+  //     {
+  //       title: "My Wallet",
+  //       url: "me",
+  //       // component: hello,
+  //     },
+    
+  //   ],
+  // },
 ];

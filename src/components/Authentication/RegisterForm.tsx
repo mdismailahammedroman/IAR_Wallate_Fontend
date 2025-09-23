@@ -185,7 +185,7 @@ export function RegisterForm({ role, className }: RegisterFormProps) {
 
           <p className="text-center text-sm mt-4 text-gray-800">
             Already have an account?{" "}
-            <Link to="/login" className="text-indigo-600">
+            <Link to="/auth/login" className="text-indigo-600">
               Log In
             </Link>
           </p>

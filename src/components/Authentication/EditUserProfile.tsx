@@ -1,126 +1,83 @@
-import React, { useState } from 'react';
+import { useForm } from "react-hook-form"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "../ui/textarea"
 
-interface UserProfile {
-  name: string;
-  email: string;
-  phone: string;
-  avatarUrl: string;
+type FormData = {
+  name: string
+  email: string
+  bio: string
 }
 
-const initialUserProfile: UserProfile = {
-  name: 'Alice Johnson',
-  email: 'alice@example.com',
-  phone: '+1234567890',
-  avatarUrl: 'https://i.pravatar.cc/150?img=1',
-};
-
 export const EditUserProfile = () => {
-  const [userProfile, setUserProfile] = useState<UserProfile>(initialUserProfile);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<UserProfile>(userProfile);
+  const { register, handleSubmit, reset } = useForm<FormData>({
+    defaultValues: {
+      name: "",
+      email: "",
+      bio: "",
+    },
+  })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, avatarUrl: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSave = () => {
-    setUserProfile(formData);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setFormData(userProfile);
-    setIsEditing(false);
-  };
+  const onSubmit = (data: FormData) => {
+    console.log("Profile updated:", data)
+    // You can hook into mutation here (e.g., Redux, tRPC, etc.)
+    reset()
+  }
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <div className="flex flex-col items-center space-y-4 mb-6">
-        <img
-          src={formData.avatarUrl}
-          alt={formData.name}
-          className="w-24 h-24 rounded-full object-cover"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleAvatarChange}
-          className="mt-2"
-        />
-        <p className="text-xl font-semibold">{formData.name}</p>
-        <p className="text-gray-500 dark:text-gray-400">{formData.email}</p>
-        <p className="text-gray-500 dark:text-gray-400">{formData.phone}</p>
-      </div>
+    <div className="max-w-md mx-auto relative overflow-hidden z-10 bg-gray-800 p-8 rounded-lg shadow-md
+      before:content-[''] before:w-24 before:h-24 before:absolute before:bg-purple-600 before:rounded-full before:-z-10 before:blur-2xl
+      after:content-[''] after:w-32 after:h-32 after:absolute after:bg-sky-400 after:rounded-full after:-z-10 after:blur-xl after:top-24 after:-right-12"
+    >
+      <h2 className="text-2xl font-bold text-white mb-6">Update Your Profile</h2>
 
-      {isEditing ? (
-        <form className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Phone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      ) : (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Edit Profile
-        </button>
-      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-gray-300">
+            Full Name
+          </Label>
+          <Input
+            {...register("name")}
+            id="name"
+            type="text"
+            className="bg-gray-700 border-gray-600 text-white"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-gray-300">
+            Email Address
+          </Label>
+          <Input
+            {...register("email")}
+            id="email"
+            type="email"
+            className="bg-gray-700 border-gray-600 text-white"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bio" className="text-gray-300">
+            Bio
+          </Label>
+          <Textarea
+            {...register("bio")}
+            id="bio"
+            rows={3}
+            className="bg-gray-700 border-gray-600 text-white"
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            className="bg-gradient-to-r from-purple-600 via-purple-400 to-blue-500 text-white hover:opacity-90 font-bold"
+          >
+            Update Profile
+          </Button>
+        </div>
+      </form>
     </div>
-  );
-};
+  )
+}
