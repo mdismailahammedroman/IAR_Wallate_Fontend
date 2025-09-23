@@ -16,19 +16,25 @@ import {
 } from "@/redux/features/auth/auth.api";
 import { useDispatch } from "react-redux";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { RoleSelectionModal } from "../Authentication/RoleSelectionModal";
+import { role } from "@/constants/roles";
+import React from "react";
 
 const links = [
-  { path: "/", label: "Home" },
-  { path: "/about", label: "About" },
-  { path: "/pricing", label: "Pricing" },
-  { path: "/contact", label: "Contact" },
-  { path: "/faq", label: "FAQ" },
+  { href: "/", label: "Home", role: "PUBLIC" },
+  { href: "/about", label: "About", role: "PUBLIC" },
+  { href: "/tours", label: "Tours", role: "PUBLIC" },
+  { href: "/admin", label: "Dashboard", role: role.SUPER_ADMIN },
+  { href: "/admin", label: "Dashboard", role: role.ADMIN },
+  { href: "/agent", label: "Dashboard", role: role.AGENT },
+  { href: "/user", label: "Dashboard", role: role.USER },
 ];
 
 export default function Navbar() {
   const { data } = useUserInfoQuery(undefined);
   const [logout] = useLogoutMutation();
   const dispatch = useDispatch();
+  console.log(data);
 
   const handleLogout = async () => {
     await logout(undefined);
@@ -46,21 +52,41 @@ export default function Navbar() {
         {/* Desktop navigation */}
         <NavigationMenu className="hidden md:block">
           <NavigationMenuList className="flex gap-6">
-            {links.map((route, i) => (
-              <NavigationMenuItem key={i}>
-                <NavigationMenuLink asChild>
-                  <NavLink
-                    to={route.path}
-                    className={({ isActive }) =>
-                      isActive
-                        ? "border-b-2 border-white font-semibold"
-                        : "hover:border-b-2 hover:border-indigo-300"
-                    }
-                  >
-                    {route.label}
-                  </NavLink>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+            {links.map((link, index) => (
+              <React.Fragment key={index}>
+                {link.role === "PUBLIC" && (
+                  <NavigationMenuItem key={index} className="w-full">
+                    <NavigationMenuLink asChild className="py-1.5">
+                      <NavLink
+                        to={link.href}
+                        className={({ isActive }) =>
+                          isActive
+                            ? "border-b-2 border-white font-semibold"
+                            : "hover:border-b-2 hover:border-indigo-300"
+                        }
+                      >
+                        {link.label}
+                      </NavLink>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                )}
+                {link.role === data?.data?.role && (
+                  <NavigationMenuItem key={index} className="w-full">
+                    <NavigationMenuLink asChild className="py-1.5">
+                      <NavLink
+                        to={link.href}
+                        className={({ isActive }) =>
+                          isActive
+                            ? "border-b-2 border-white font-semibold"
+                            : "hover:border-b-2 hover:border-indigo-300"
+                        }
+                      >
+                        {link.label}
+                      </NavLink>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                )}
+              </React.Fragment>
             ))}
           </NavigationMenuList>
         </NavigationMenu>
@@ -78,7 +104,7 @@ export default function Navbar() {
                 {links.map((route, i) => (
                   <NavLink
                     key={i}
-                    to={route.path}
+                    to={route.href}
                     className={({ isActive }) =>
                       isActive
                         ? "text-indigo-600 font-semibold"
@@ -92,12 +118,11 @@ export default function Navbar() {
                 <div className="mt-6 border-t pt-4">
                   {!data?.data?.email ? (
                     <div className="flex flex-col-reverse sm:flex-row lg:flex-row gap-2">
-                      <Link to="/login" className="text-indigo-400 hover:underline">
-                        Sign In
-                      </Link>
-                      <Link to="/register" className="text-indigo-400 hover:underline">
-                        Sign Up
-                      </Link>
+                      <Button asChild className="text-sm">
+                        <Link to="/auth/login">Login</Link>
+                      </Button>
+                      <RoleSelectionModal action="register" />
+
                     </div>
 
                   ) : (
@@ -122,15 +147,14 @@ export default function Navbar() {
         </div>
 
         {/* Right side - desktop auth buttons */}
+        {/* Right side - desktop auth buttons */}
         <div className="hidden md:flex gap-3 items-center">
           {!data?.data?.email ? (
             <>
-              <Button variant="ghost" asChild>
-                <Link to="/login">Sign In</Link>
+              <Button asChild className="text-sm">
+                <Link to="/auth/login">Login</Link>
               </Button>
-              <Button asChild>
-                <Link to="/register">Sign Up</Link>
-              </Button>
+              <RoleSelectionModal action="register" />
             </>
           ) : (
             <Button onClick={handleLogout}>Sign Out</Button>
@@ -138,6 +162,7 @@ export default function Navbar() {
 
           <ModeToggle />
         </div>
+
       </nav>
     </header>
   );
