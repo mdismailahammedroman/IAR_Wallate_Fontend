@@ -20,7 +20,6 @@ import { useUserInfoQuery } from "@/redux/features/auth/auth.api"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const { data:userData } = useUserInfoQuery(undefined);
-console.log("userdata", userData);
 
 
   const userRole = userData?.data?.role?.toUpperCase();
@@ -37,9 +36,9 @@ console.log("userdata", userData);
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <h2 className="text-2xl font-bold hover:text-indigo-300">
+        <Link to={"/"}><h2 className="text-2xl font-bold hover:text-indigo-300">
           IAR-WalletPro
-        </h2>
+        </h2></Link>
       </SidebarHeader>
       <SidebarContent>
         {data.navMain.map((item) => (
