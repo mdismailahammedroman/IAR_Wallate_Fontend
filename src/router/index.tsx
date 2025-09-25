@@ -15,6 +15,10 @@ import { userSidebarItems } from "./userSidebarItems";
 import { LoginForm } from "@/components/Authentication/LoginForm";
 import { agentSidebarItems } from "./agentSidebar";
 import { adminSidebarItems } from "./AdminSidebarItem";
+import { role } from "@/constants/roles";
+import type { TRole } from "@/types";
+import { withAuth } from "@/utils/withAuth";
+import { UnAuthorized } from "@/pages/UnAuthorized/UnAuthorized";
 
 
 
@@ -31,7 +35,7 @@ const router = createBrowserRouter([
         ],
     },
     {
-        Component: DashboardLayout,
+        Component:  withAuth(DashboardLayout, role.ADMIN as TRole),
         path: "/admin",
         children: [
               { index: true, element: <Navigate to="/admin/analytics" /> },
@@ -40,7 +44,7 @@ const router = createBrowserRouter([
     },
     {
         //  withAuth(DashboardLayout, role.AGENT as TRole),
-        Component: DashboardLayout,
+        Component:  withAuth(DashboardLayout, role.AGENT as TRole),
         path: "/agent",
         children: [
               { index: true, element: <Navigate to="/agent/me" /> },
@@ -49,7 +53,7 @@ const router = createBrowserRouter([
     },
     {
         
-        Component: DashboardLayout,
+        Component:  withAuth(DashboardLayout, role.USER as TRole),
         path: "/user",
         children: [
               { index: true, element: <Navigate to="/user/me" /> },
@@ -67,7 +71,10 @@ const router = createBrowserRouter([
 {
   path: "/auth/login",
   element: <LoginForm  />
-},
+},  {
+    Component: UnAuthorized,
+    path: "/unauthorized",
+  },
 
 
     {

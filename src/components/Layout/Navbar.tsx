@@ -23,7 +23,7 @@ import React from "react";
 const links = [
   { href: "/", label: "Home", role: "PUBLIC" },
   { href: "/about", label: "About", role: "PUBLIC" },
-  { href: "/tours", label: "Tours", role: "PUBLIC" },
+  { href: "/faq", label: "Faq", role: "PUBLIC" },
   { href: "/admin", label: "Dashboard", role: role.SUPER_ADMIN },
   { href: "/admin", label: "Dashboard", role: role.ADMIN },
   { href: "/agent", label: "Dashboard", role: role.AGENT },

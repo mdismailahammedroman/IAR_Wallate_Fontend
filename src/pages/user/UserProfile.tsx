@@ -1,7 +1,17 @@
 import { HoverCardContent, HoverCardTrigger,HoverCard } from "@/components/ui/hover-card"
-import { Phone, Mail, Globe, MapPin } from "lucide-react"
+import { useUserInfoQuery } from "@/redux/features/auth/auth.api"
+import { Phone, Mail } from "lucide-react"
 
 export const UserProfile = () => {
+  const { data:useDataInfo, isLoading, error } = useUserInfoQuery(undefined);
+const user = useDataInfo?.data;
+const email=user?.email.split("@")
+
+
+if (isLoading) return <p>Loading...</p>;
+if (error) return <p>Failed to load user info.</p>;
+console.log("email");
+  
   return (
     <div
       className="profile-card w-[300px] lg:w-xl mx-auto rounded-md shadow-xl overflow-hidden z-[100] relative cursor-pointer snap-start shrink-0 bg-white flex flex-col items-center justify-center gap-3 transition-all duration-300 group"
@@ -20,13 +30,13 @@ export const UserProfile = () => {
         />
         <div className="space-y-0.5">
           <HoverCardTrigger asChild>
-            <p>
-              <a className="text-sm font-medium hover:underline" href="#">
-                Keith Kennedy
-              </a>
+            
+              <p className="text-sm font-medium hover:underline" >
+                {user.name}
+              
             </p>
           </HoverCardTrigger>
-          <p className="text-muted-foreground text-xs">@k.kennedy</p>
+          <p className="text-muted-foreground text-xs">@{email[0]}</p>
         </div>
       </div>
       <HoverCardContent>
@@ -40,41 +50,8 @@ export const UserProfile = () => {
               alt="Avatar"
             />
             <div className="space-y-0.5">
-              <p className="text-sm font-medium">Keith Kennedy</p>
-              <p className="text-muted-foreground text-xs">@k.kennedy</p>
-            </div>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            Designer at{" "}
-            <strong className="text-foreground font-medium">@Origin UI</strong>.
-            Crafting web experiences with Tailwind CSS.
-          </p>
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-1.5">
-              <img
-                className="ring-background rounded-full ring-1"
-                src="/avatar-20-04.jpg"
-                width={20}
-                height={20}
-                alt="Friend 01"
-              />
-              <img
-                className="ring-background rounded-full ring-1"
-                src="/avatar-20-05.jpg"
-                width={20}
-                height={20}
-                alt="Friend 02"
-              />
-              <img
-                className="ring-background rounded-full ring-1"
-                src="/avatar-20-06.jpg"
-                width={20}
-                height={20}
-                alt="Friend 03"
-              />
-            </div>
-            <div className="text-muted-foreground text-xs">
-              3 mutual friends
+              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-muted-foreground text-xs">{user.email}</p>
             </div>
           </div>
         </div>
@@ -82,8 +59,8 @@ export const UserProfile = () => {
     </HoverCard>
       </div>
       <div className="headings *:text-center *:leading-4">
-        <p className="text-xl font-serif font-semibold text-[#434955]">ANNA WILSON</p>
-        <p className="text-sm font-semibold text-[#434955]">DEVELOPER</p>
+        <p className="text-xl font-serif font-semibold text-[#434955]">{user.name}</p>
+        <p className="text-sm font-semibold text-[#434955]">{user.role}</p>
       </div>
       <div className="w-full items-center justify-center flex">
         <ul
@@ -91,20 +68,20 @@ export const UserProfile = () => {
         >
           <li className="flex items-center gap-2">
             <Phone size={15} className="text-stone-700 group-hover:text-[#58b0e0]" />
-            <p>+123-458-784</p>
+            <p>N/A</p>
           </li>
           <li className="flex items-center gap-2">
             <Mail size={15} className="text-stone-700 group-hover:text-[#58b0e0]" />
-            <p>smkys@gmail.com</p>
+            <p>{user.email}</p>
           </li>
-          <li className="flex items-center gap-2">
+          {/* <li className="flex items-center gap-2">
             <Globe size={15} className="text-stone-700 group-hover:text-[#58b0e0]" />
             <p>smkydevelopr.com</p>
           </li>
           <li className="flex items-center gap-2">
             <MapPin size={15} className="text-stone-700 group-hover:text-[#58b0e0]" />
             <p>456 Anytown, Near Anywhere, ST 47523</p>
-          </li>
+          </li> */}
         </ul>
       </div>
       <hr
