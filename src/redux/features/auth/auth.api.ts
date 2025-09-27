@@ -7,18 +7,25 @@ import type {
   IResponse,
   IsendOtp,
   IverifyOtp,
+  UpdateUserPayload,
 } from "@/types/auth.types";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    userRegister: builder.mutation<IResponse<ILoginAndRegister>, IRegisterPayload>({
+    userRegister: builder.mutation<
+      IResponse<ILoginAndRegister>,
+      IRegisterPayload
+    >({
       query: (userInfo) => ({
         url: "/user/register",
         method: "POST",
         data: userInfo,
       }),
     }),
-    agentRegister: builder.mutation<IResponse<ILoginAndRegister>, IRegisterPayload>({
+    agentRegister: builder.mutation<
+      IResponse<ILoginAndRegister>,
+      IRegisterPayload
+    >({
       query: (userInfo) => ({
         url: "/agent/agent-register",
         method: "POST",
@@ -53,12 +60,30 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["USER"],
     }),
-    userInfo: builder.query({
-      query: () => ({
-        url: "/user/me",
-        method: "GET",
+    userInfo: builder.query<IResponse<ILoginAndRegister>, void>({
+  query: () => ({
+    url: "/user/me",
+    method: "GET",
+  }),
+}),
+
+// AGENT: GET /agent/me
+getAgentInfo: builder.query<IResponse<ILoginAndRegister>, void>({
+  query: () => ({
+    url: "/agent/me",
+    method: "GET",
+  }),
+}),
+    updateUser: builder.mutation<
+      IResponse<null>,
+      { id: string; data: Partial<UpdateUserPayload> }
+    >({
+      query: ({ id, data }) => ({
+        url: `/user/${id}`,
+        method: "PATCH",
+        body: data, // ✅ Use 'body' instead of 'data'
       }),
-      providesTags: ["USER"],
+      invalidatesTags: ["USER", "AGENT", "ADMIN"],
     }),
   }),
 });
@@ -70,5 +95,7 @@ export const {
   useLogoutMutation,
   useSendOtpMutation,
   useVerifyOtpMutation,
-  useUserInfoQuery
+  useUserInfoQuery,
+  useUpdateUserMutation,
+  useGetAgentInfoQuery,
 } = authApi;

@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router";
 import Lottie from "react-lottie";
+import { RoleSelectionModal } from "./RoleSelectionModal";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -31,11 +32,32 @@ export const LoginForm = ({ className, ...props }: React.HTMLAttributes<HTMLDivE
 
 const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
   try {
-    const res = await login(data).unwrap();
-    if (res.success) {
-      toast.success("Logged in successfully");
+    const response = await login(data).unwrap(); // ✅ Use form data
+
+    const { accessToken, user } = response.data;
+
+    if (!user?.role) {
+      console.error("Missing role in login response");
+      return;
+    }
+
+    // Store auth details
+    localStorage.setItem("token", accessToken);
+    localStorage.setItem("role", user.role);
+    localStorage.setItem("email", user.email);
+    localStorage.setItem("userId", user._id);
+
+    // Redirect based on role
+    if (user.role === "AGENT") {
+      navigate("/agent");
+    } else if (user.role === "USER") {
+      navigate("/user");
+    } else if (user.role === "ADMIN") {
+      navigate("/admin");
+    } else {
       navigate("/");
     }
+
   } catch (err: any) {
     console.error("Login error:", err);
 
@@ -44,13 +66,13 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
       toast.error("Invalid credentials");
     } else if (message === "User is not verified") {
       toast.error("Your account is not verified");
-      // console.log("Navigating to /verify with email:", data.email);
       navigate("/verify", { state: data.email });  // Pass email to /verify
     } else {
       toast.error("Something went wrong");
     }
   }
 };
+
 
   const defaultOptions = {
     loop: true,
@@ -126,6 +148,7 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
           <p className="text-center text-sm mt-4 text-gray-800">
             Don't have an account?{" "}
             <Link to="/register" className="text-indigo-600 cursor-pointer">
+                     
               Sign Up
             </Link>
           </p>

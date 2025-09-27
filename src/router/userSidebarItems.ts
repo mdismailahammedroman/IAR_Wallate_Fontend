@@ -1,23 +1,21 @@
-
-
+// userSidebarItems.ts
 import { UserProfile } from "@/pages/user/UserProfile";
+import { UserUpdateForm } from "@/pages/user/UserUpdateForm";
 import type { ISidebarItem } from "@/types";
 
-
 export const userSidebarItems: ISidebarItem[] = [
- {
+  {
     title: "user",
     items: [
-   
       {
-        title: "Update Profile",
+        title: "Profile",
         url: "me",
         component: UserProfile,
       },
       {
-        title: "Update Profile",
-        url: "hello",
-        component: UserProfile,
+        title: "Edit Profile",
+        url: "edit", 
+        component: UserUpdateForm,
       },
       {
         title: "Update Profile",
@@ -26,15 +24,4 @@ export const userSidebarItems: ISidebarItem[] = [
       },
     ],
   },
-  // {
-  //   title: "Profile",
-  //   items: [
-  //     {
-  //       title: "My Wallet",
-  //       url: "me",
-  //       // component: hello,
-  //     },
-    
-  //   ],
-  // },
 ];

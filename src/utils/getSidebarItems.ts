@@ -14,7 +14,7 @@ export const getSidebarItems = (userRole: string) => {
     case "ADMIN":
       return [...adminSidebarItems];
     case "AGENT":
-      return [...agentSidebarItems];
+     return [...agentSidebarItems];
     case "USER":
       return [...userSidebarItems];
     default:

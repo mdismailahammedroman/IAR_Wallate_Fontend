@@ -1,4 +1,4 @@
-export type {IResponse,ILoginPayload,ILoginRespons,IRegisterPayload,IsendOtp, ApiError, IverifyOtp,} from "@/types/auth.types"
+export type {IResponse,ILoginPayload,ILoginRespons,IRegisterPayload,IsendOtp,ApiError, IverifyOtp,} from "@/types/auth.types"
 
 import type { ComponentType } from "react";
 

@@ -73,7 +73,7 @@ export const Verify = () => {
               localStorage.setItem("isVerified", "true");
 
       // ✅ Redirect and prevent back
-      navigate("/dashboard", { replace: true })
+      navigate("/", { replace: true })
       }
     } catch (error) {
 
