@@ -13,43 +13,30 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router"
-import { getSidebarItems } from "@/utils/getSidebarItems"
-import { useUserInfoQuery } from "@/redux/features/auth/auth.api"
+import type { ISidebarItem } from "@/types"
 
+interface AppSidebarProps {
+  items: ISidebarItem[];
+}
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-
-    const { data:userData } = useUserInfoQuery(undefined);
-
-
-  const userRole = userData?.data?.role?.toUpperCase();
-
- const data = {
-  navMain: getSidebarItems(userRole),
-};
-
- 
-
-
-
-
+export function AppSidebar({ items, ...props }: AppSidebarProps) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <Link to={"/"}><h2 className="text-2xl font-bold hover:text-indigo-300">
-          IAR-WalletPro
-        </h2></Link>
+        <Link to={"/"}>
+          <h2 className="text-2xl font-bold hover:text-indigo-300">IAR-WalletPro</h2>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
-        {data.navMain.map((item) => (
+        {items.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {item.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
+                {item.items.map((subItem) => (
+                  <SidebarMenuItem key={subItem.title}>
                     <SidebarMenuButton asChild>
-                      <Link to={item.url}>{item.title}</Link>
+                      <Link to={subItem.url}>{subItem.title}</Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

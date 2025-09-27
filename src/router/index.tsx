@@ -35,22 +35,21 @@ const router = createBrowserRouter([
         ],
     },
     {
-        Component:  withAuth(DashboardLayout, role.ADMIN as TRole),
-        path: "/admin",
-        children: [
-              { index: true, element: <Navigate to="/admin/analytics" /> },
-           ...generateRoutes(adminSidebarItems)
-        ]
-    },
-    {
-        //  withAuth(DashboardLayout, role.AGENT as TRole),
-        Component:  withAuth(DashboardLayout, role.AGENT as TRole),
-        path: "/agent",
-        children: [
-              { index: true, element: <Navigate to="/agent/me" /> },
-            ...generateRoutes(agentSidebarItems)
-        ]
-    },
+  Component: withAuth(DashboardLayout, [role.ADMIN as TRole, role.SUPER_ADMIN as TRole]),
+  path: "/admin",
+  children: [
+    { index: true, element: <Navigate to="/admin/analytics" /> },
+    ...generateRoutes(adminSidebarItems),
+  ],
+},{
+  Component: withAuth(DashboardLayout, role.AGENT as TRole),
+  path: "/agent",
+  children: [
+    { index: true, element: <Navigate to="/agent/me" /> },
+    ...generateRoutes(agentSidebarItems)
+  ]
+}
+,
     {
         
         Component:  withAuth(DashboardLayout, role.USER as TRole),

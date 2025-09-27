@@ -24,9 +24,15 @@ export interface ILoginRespons {
 
 export interface ILoginAndRegister {
   _id: string
-  name: string
-  email: string
-  role: string
+  
+  email: string;
+  password: string;
+  name?: string; // maybe optional for login
+  role?: string;
+  phone?: string; // ✅ Add this line
+  address?: string;
+  profileImage?: string;
+  dateOfBirth?: string;
   isVerified: boolean
   userStatus: string
   isDeleted: boolean
@@ -36,6 +42,7 @@ export interface ILoginAndRegister {
   commissionRate: number
   createdAt: string
   updatedAt: string
+
 }
 
 export interface Auth {
@@ -52,13 +59,29 @@ export interface IverifyOtp{
   otp:string,
 }
 
-export interface IResponse<T> {
-  statusCode: number
-  success: boolean
-  message: string
-  data: T
+export interface IUserAuth {
+  provider: string;
+  providerID: string;
 }
 
+export type UserRole = "USER" | "AGENT" | "ADMIN";
+export type UserStatus = "PENDING" | "APPROVED" | "REJECTED"; // Add if needed
+export type ActiveStatus = "ACTIVE" | "INACTIVE";
+
+export type UpdateUserPayload = {
+  name?: string;
+  picture?: string;
+  phone?: string;
+  address?: string;
+  profileImage?: string;
+  dateOfBirth?: string;
+};
+export interface IResponse<T> {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: T;
+}
 
 
 
