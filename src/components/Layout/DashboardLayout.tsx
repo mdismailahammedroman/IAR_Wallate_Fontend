@@ -1,12 +1,12 @@
 import { Outlet } from "react-router";
-import { ModeToggle } from "./mode.toggle";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "../ui/sidebar";
-import { AppSidebar } from "../ui/app-sidebar";
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import { getSidebarItems } from "@/utils/getSidebarItems";
 import { Separator } from "../ui/separator";
+import ModeToggle from "./mode.toggle";
+import AppSidebar from "../ui/app-sidebar";
 
-export const DashboardLayout = () => {
+ const DashboardLayout = () => {
   const { data, isLoading } = useUserInfoQuery();
 
   if (isLoading) {
@@ -14,12 +14,10 @@ export const DashboardLayout = () => {
   }
 
   const userRole = data?.data?.role?.toUpperCase() ?? localStorage.getItem("role")?.toUpperCase() ?? "PUBLIC";
-console.log("DashboardLayout userRole:", userRole);
 
   const sidebarItems = getSidebarItems(userRole);
 
-  console.log("User Role in DashboardLayout:", userRole);
-  console.log("Sidebar Items:", sidebarItems);
+  
 
   return (
     <SidebarProvider>
@@ -43,3 +41,5 @@ console.log("DashboardLayout userRole:", userRole);
     </SidebarProvider>
   );
 };
+
+export default DashboardLayout

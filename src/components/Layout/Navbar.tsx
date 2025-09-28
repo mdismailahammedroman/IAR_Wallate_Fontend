@@ -1,198 +1,155 @@
-import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
-import { ModeToggle } from "./mode.toggle";
-import { Menu } from "lucide-react";
-
-import { Link, NavLink } from "react-router";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Link } from "react-router";
 import {
   authApi,
   useLogoutMutation,
   useUserInfoQuery,
-  useGetAgentInfoQuery,
 } from "@/redux/features/auth/auth.api";
-import { useDispatch } from "react-redux";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { RoleSelectionModal } from "../Authentication/RoleSelectionModal";
+import { useAppDispatch } from "@/redux/hook";
+import React from "react";
 import { role } from "@/constants/roles";
+import ModeToggle from "./mode.toggle";
 
-export default function Navbar() {
-  const dispatch = useDispatch();
-  const [logout] = useLogoutMutation();
+// Navigation links array to be used in both desktop and mobile menus
+const navigationLinks = [
 
-  const storedRole = localStorage.getItem("role") || "PUBLIC";
-
-  // Fetch user or agent info conditionally
-  const {
-    data: userRes,
-    isLoading: userLoading,
-
-  } = useUserInfoQuery(undefined, { skip: storedRole !== role.USER });
-
-  const {
-    data: agentRes,
-    isLoading: agentLoading,
-
-  } = useGetAgentInfoQuery(undefined, { skip: storedRole !== role.AGENT });
-
-  const data = storedRole === role.AGENT ? agentRes : userRes;
-  const isLoading = storedRole === role.AGENT ? agentLoading : userLoading;
-
-  const user = data?.data;
-  const userRole = user?.role || storedRole;
-  const userEmail = user?.email || localStorage.getItem("email");
-
-  if (isLoading) return <p>Loading...</p>;
-
-
-  // 🧠 Determine dashboard path based on role
-  const dashboardHref =
-    userRole === role.ADMIN || userRole === role.SUPER_ADMIN
-      ? "/admin/analytics"
-      : userRole === role.AGENT
-      ? "/agent/me"
-      : userRole === role.USER
-      ? "/user/me"
-      : "/";
-
-  // 🧭 Navigation links
-  const links = [
     { href: "/", label: "Home", roles: ["PUBLIC"] },
     { href: "/about", label: "About", roles: ["PUBLIC"] },
     { href: "/faq", label: "Faq", roles: ["PUBLIC"] },
-    {
-      href: dashboardHref,
-      label: "Dashboard",
-      roles: [role.ADMIN, role.SUPER_ADMIN, role.AGENT, role.USER],
-    },
-  ];
+  { href: "/admin", label: "Dashboard", role: role.ADMIN },
+  { href: "/admin", label: "Dashboard", role: role.SUPER_ADMIN },
+  { href: "/user", label: "Dashboard", role: role.USER },
+  { href: "/user", label: "Dashboard", role: role.AGENT },
+];
 
-  // 🧹 Logout handler
+export default function Navbar() {
+  const { data } = useUserInfoQuery(undefined);
+  const [logout] = useLogoutMutation();
+  const dispatch = useAppDispatch();
+
   const handleLogout = async () => {
     await logout(undefined);
     dispatch(authApi.util.resetApiState());
-    localStorage.clear();
-    window.location.href = "/auth/login";
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-900 text-white dark:text-gray-200 shadow-md">
+      <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-900 text-white dark:text-gray-200 shadow-md">
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-        {/* Logo */}
-        <Link to="/" className="text-2xl font-bold hover:text-indigo-300">
+        {/* Left side */}
+        <div className="flex items-center gap-2">
+          {/* Mobile menu trigger */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                className="group size-8 md:hidden"
+                variant="ghost"
+                size="icon"
+              >
+                <svg
+                  className="pointer-events-none"
+                  width={16}
+                  height={16}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 12L20 12"
+                    className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+                  />
+                  <path
+                    d="M4 12H20"
+                    className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
+                  />
+                  <path
+                    d="M4 12H20"
+                    className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+                  />
+                </svg>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-36 p-1 md:hidden">
+              <NavigationMenu className="max-w-none *:w-full">
+                <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
+                  {navigationLinks.map((link, index) => (
+                    <NavigationMenuItem key={index} className="w-full">
+                      <NavigationMenuLink asChild className="py-1.5">
+                        <Link to={link.href}>{link.label} </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                  ))}
+                </NavigationMenuList>
+              </NavigationMenu>
+            </PopoverContent>
+          </Popover>
+          {/* Main nav */}
+          <div className="flex items-center gap-6">
+           <Link to="/" className="text-2xl font-bold hover:text-indigo-300">
           IAR-WalletPro
         </Link>
-
-        {/* Desktop Navigation */}
-        <NavigationMenu className="hidden md:block">
-          <NavigationMenuList className="flex gap-6">
-            {links.map((link, index) => {
-              const isPublic = link.roles.includes("PUBLIC");
-              const isPrivate = link.roles.includes(userRole);
-
-              if (isPublic || isPrivate) {
-                return (
-                  <NavigationMenuItem key={index} className="w-full">
-                    <NavigationMenuLink asChild className="py-1.5">
-                      <NavLink
-                        to={link.href}
-                        className={({ isActive }) =>
-                          isActive
-                            ? "border-b-2 border-white font-semibold"
-                            : "hover:border-b-2 hover:border-indigo-300"
-                        }
-                      >
-                        {link.label}
-                      </NavLink>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                );
-              }
-
-              return null;
-            })}
-          </NavigationMenuList>
-        </NavigationMenu>
-
-        {/* Mobile Navigation */}
-        <div className="md:hidden flex items-center gap-3">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[250px] pt-10">
-              <nav className="flex flex-col gap-4 ml-5">
-                {links.map((link, i) => {
-                  const isPublic = link.roles.includes("PUBLIC");
-                  const isPrivate = link.roles.includes(userRole);
-
-                  if (isPublic || isPrivate) {
-                    return (
-                      <NavLink
-                        key={i}
-                        to={link.href}
-                        className={({ isActive }) =>
-                          isActive
-                            ? "text-indigo-600 font-semibold"
-                            : "hover:text-indigo-400"
-                        }
-                      >
-                        {link.label}
-                      </NavLink>
-                    );
-                  }
-
-                  return null;
-                })}
-
-                {/* Auth Actions */}
-                <div className="mt-6 border-t pt-4">
-                  {!userEmail ? (
-                    <div className="flex flex-col-reverse sm:flex-row lg:flex-row gap-2">
-                      <Button asChild className="text-sm">
-                        <Link to="/auth/login">Login</Link>
-                      </Button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleLogout}
-                      className="text-red-500 hover:underline"
-                    >
-                      Sign Out
-                    </button>
-                  )}
-                </div>
-
-                <div className="mt-4">
-                  <ModeToggle />
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
-
-          <ModeToggle />
+            {/* Navigation menu */}
+            <NavigationMenu className="max-md:hidden">
+              <NavigationMenuList className="gap-2">
+                {navigationLinks.map((link, index) => (
+                  <React.Fragment key={index}>
+                    {link.role === "PUBLIC" && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink
+                          asChild
+                          className="text-background hover:text-primary py-1.5 font-medium"
+                        >
+                          <Link to={link.href}>{link.label}</Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                    {link.role === data?.data?.role && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink
+                          asChild
+                          className="text-background hover:text-primary py-1.5 font-medium"
+                        >
+                          <Link to={link.href}>{link.label}</Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                  </React.Fragment>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
         </div>
-
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex gap-3 items-center">
-          {!userEmail ? (
-            <>
-              <Button asChild className="text-sm">
-                <Link to="/auth/login">Login</Link>
-              </Button>
-              <RoleSelectionModal action="register" />
-            </>
-          ) : (
-            <Button onClick={handleLogout}>Sign Out</Button>
-          )}
+        {/* Right side */}
+        <div className="flex items-center gap-2">
           <ModeToggle />
+          {data?.data?.email && (
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="text-sm"
+            >
+              Logout
+            </Button>
+          )}
+          {!data?.data?.email && (
+            <Button asChild className="text-sm">
+              <Link to="/auth/login">Login</Link>
+            </Button>
+          )}
         </div>
       </nav>
     </header>

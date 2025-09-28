@@ -16,7 +16,7 @@ interface RoleSelectionModalProps {
   action: Action;
 }
 
-export function RoleSelectionModal({ action }: RoleSelectionModalProps) {
+ function RoleSelectionModal({ action }: RoleSelectionModalProps) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -62,3 +62,4 @@ export function RoleSelectionModal({ action }: RoleSelectionModalProps) {
     </Dialog>
   );
 }
+export default RoleSelectionModal

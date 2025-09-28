@@ -9,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router";
 import Lottie from "react-lottie";
-import { RoleSelectionModal } from "./RoleSelectionModal";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -18,13 +17,13 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export const LoginForm = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+ const LoginForm = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "mirhussainmurtaza@gmail.com",
-      password: "12345678",
+      email: "superadmin@gmail.com",
+      password: "Ismail@476245",
     },
   });
 
@@ -44,19 +43,9 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     // Store auth details
     localStorage.setItem("token", accessToken);
     localStorage.setItem("role", user.role);
-    localStorage.setItem("email", user.email);
-    localStorage.setItem("userId", user._id);
 
-    // Redirect based on role
-    if (user.role === "AGENT") {
-      navigate("/agent");
-    } else if (user.role === "USER") {
-      navigate("/user");
-    } else if (user.role === "ADMIN") {
-      navigate("/admin");
-    } else {
       navigate("/");
-    }
+    
 
   } catch (err: any) {
     console.error("Login error:", err);
@@ -157,3 +146,4 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     </motion.div>
   );
 };
+export default LoginForm

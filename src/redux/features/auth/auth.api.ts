@@ -74,14 +74,12 @@ getAgentInfo: builder.query<IResponse<ILoginAndRegister>, void>({
     method: "GET",
   }),
 }),
-    updateUser: builder.mutation<
-      IResponse<null>,
-      { id: string; data: Partial<UpdateUserPayload> }
-    >({
-      query: ({ id, data }) => ({
+
+    updateUser: builder.mutation<IResponse<ILoginAndRegister>, { id: string; updateData: UpdateUserPayload }>({
+      query: ({ id, updateData }) => ({
         url: `/user/${id}`,
         method: "PATCH",
-        body: data, // ✅ Use 'body' instead of 'data'
+        body: updateData, // ✅ Use 'body' instead of 'data'
       }),
       invalidatesTags: ["USER", "AGENT", "ADMIN"],
     }),

@@ -19,7 +19,7 @@ interface AppSidebarProps {
   items: ISidebarItem[];
 }
 
-export function AppSidebar({ items, ...props }: AppSidebarProps) {
+export default function AppSidebar({ items, ...props }: AppSidebarProps) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>

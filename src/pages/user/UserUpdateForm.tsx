@@ -1,102 +1,78 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  useUpdateUserMutation,
-  useUserInfoQuery,
-  useGetAgentInfoQuery,
-} from "@/redux/features/auth/auth.api";
-import { toast } from "sonner";
-import type { UpdateUserPayload } from "@/types/auth.types";
-import { useEffect } from "react";
+// src/components/UserUpdateForm.tsx
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import {  useUpdateUserMutation, useUserInfoQuery } from '@/redux/features/auth/auth.api';
+import type { UpdateUserPayload } from '@/types/auth.types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
-export const UserUpdateForm = () => {
-  const role = localStorage.getItem("role");
-
-  // Fetch correct data based on role
-  const {
-    data: userRes,
-    isLoading: loadingUser,
-    error: userError,
-  } = useUserInfoQuery(undefined, { skip: role !== "USER" });
-
-  const {
-    data: agentRes,
-    isLoading: loadingAgent,
-    error: agentError,
-  } = useGetAgentInfoQuery(undefined, { skip: role !== "AGENT" });
+export const UserUpdateForm: React.FC = () => {
+  // Fetch user info
+  const { data: userRes, isLoading, isError } = useUserInfoQuery();
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
 
-  const data = role === "AGENT" ? agentRes : userRes;
-  const isLoading = role === "AGENT" ? loadingAgent : loadingUser;
-  const error = role === "AGENT" ? agentError : userError;
+  const user = userRes?.data;
 
-  const user = data?.data;
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-  } = useForm<UpdateUserPayload>({
+  // Setup form
+  const { register, handleSubmit, reset } = useForm<UpdateUserPayload>({
     defaultValues: {
-      name: "",
-      phone: "",
-      address: "",
-      profileImage: "",
-      dateOfBirth: "",
+      name: '',
+      phone: '',
+      address: '',
+      profileImage: '',
+      dateOfBirth: '',
     },
   });
 
-  // Populate form on data load
+  // Reset form when user data loads
   useEffect(() => {
     if (user) {
-      const {
-        name,
-        phone,
-        address,
-        profileImage,
-        dateOfBirth,
-      } = user;
-      reset({ name, phone, address, profileImage, dateOfBirth });
+      reset({
+        name: user.name || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        profileImage: user.profileImage || '',
+        // Date of Birth: if ISO string exists, convert to YYYY-MM-DD format for <input type="date" />
+        dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
+      });
     }
   }, [user, reset]);
 
-  // Submit form
+  // Submit handler
   const onSubmit = async (formData: UpdateUserPayload) => {
-    const userId = user?._id;
-
-    if (!userId) {
-      toast.error("User ID is missing.");
+    if (!user?._id) {
+      toast.error('User ID is missing.');
       return;
     }
-
     try {
-      await updateUser({ id: userId, data: formData }).unwrap();
-      toast.success("Profile updated successfully!");
+      await updateUser({ id: user._id, updateData: formData }).unwrap();
+      toast.success('Profile updated successfully!');
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update profile.");
+      toast.error(error?.data?.message || 'Failed to update profile.');
     }
   };
 
   if (isLoading) return <p>Loading user data...</p>;
-  if (!user) return <p>No user data found.</p>;
-  if (error) return <p>Error loading user data.</p>;
+  if (isError) return <p>Error loading user data.</p>;
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-md mx-auto"
-    >
-      <Input {...register("name")} placeholder="Name" />
-      <Input {...register("phone")} placeholder="Phone" />
-      <Input {...register("address")} placeholder="Address" />
-      <Input {...register("dateOfBirth")} placeholder="Date of Birth" />
-      <Input {...register("profileImage")} placeholder="Profile Image URL" />
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto space-y-4">
+      <Input {...register('name')} placeholder="Name" required />
+      <Input {...register('phone')} placeholder="Phone" />
+      <Input {...register('address')} placeholder="Address" />
+      <Input
+        {...register('dateOfBirth')}
+        type="date"
+        placeholder="Date of Birth"
+        max={new Date().toISOString().split('T')[0]}
+      />
+      <Input {...register('profileImage')} placeholder="Profile Image URL" />
 
       <Button type="submit" disabled={isUpdating}>
-        {isUpdating ? "Updating..." : "Update Profile"}
+        {isUpdating ? 'Updating...' : 'Update Profile'}
       </Button>
     </form>
   );

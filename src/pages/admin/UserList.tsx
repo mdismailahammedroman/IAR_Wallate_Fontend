@@ -27,7 +27,7 @@ const users = [
   },
 ];
 
-export const UserList = () => {
+ const UserList = () => {
   return (
     <div className="space-y-4">
       {users.map((user) => (
@@ -53,3 +53,4 @@ export const UserList = () => {
     </div>
   );
 };
+export default UserList
