@@ -10,7 +10,7 @@ type FormData = {
   bio: string
 }
 
-export const EditUserProfile = () => {
+const EditUserProfile = () => {
   const { register, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
       name: "",
@@ -81,3 +81,5 @@ export const EditUserProfile = () => {
     </div>
   )
 }
+
+export default EditUserProfile

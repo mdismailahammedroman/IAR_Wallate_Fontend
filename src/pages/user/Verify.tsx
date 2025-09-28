@@ -23,7 +23,7 @@ const FormSchema = z.object({
   }),
 });
 
-export const Verify = () => {
+ const Verify = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [email] = useState(location.state)
@@ -218,3 +218,5 @@ export const Verify = () => {
     </motion.div>
   );
 };
+
+export default Verify

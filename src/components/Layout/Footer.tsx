@@ -1,6 +1,6 @@
 import { Facebook, Github,  Instagram, Linkedin, Twitter } from "lucide-react";
 
-export const Footer = () => {
+ const Footer = () => {
   return (
    <footer className=" bg-primary dark:bg-gray-800 text-white dark:text-gray-300 py-8 px-6">
       <div className="max-w-7xl mx-auto px-4 py-16 space-y-8">
@@ -82,3 +82,4 @@ export const Footer = () => {
     </footer>
   );
 };
+export default Footer

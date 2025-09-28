@@ -1,5 +1,4 @@
 import {
-
   useGetAgentInfoQuery,
   useUserInfoQuery,
 } from "@/redux/features/auth/auth.api";
@@ -9,29 +8,38 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
+import { useEffect, useState } from "react";
 
 export const UserProfile = () => {
-  const role = localStorage.getItem("role");
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole);
+  }, []);
 
   const {
     data: userRes,
     isLoading: userLoading,
     error: userError,
-  } = useUserInfoQuery(undefined, { skip: role !== "USER" });
+  } = useUserInfoQuery();
 
   const {
     data: agentRes,
     isLoading: agentLoading,
     error: agentError,
-  } = useGetAgentInfoQuery(undefined, { skip: role !== "AGENT" });
+  } = useGetAgentInfoQuery();
+console.log("Current role from localStorage:", role);
+
+  if (!role) return <p>Loading role...</p>;
 
   const data = role === "AGENT" ? agentRes : userRes;
   const isLoading = role === "AGENT" ? agentLoading : userLoading;
   const error = role === "AGENT" ? agentError : userError;
-
   const user = data?.data;
+if (!user) return <p>No user data returned from server.</p>;
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <p>Loading user info...</p>;
   if (error || !user) return <p>Failed to load user info.</p>;
 
   const emailPrefix = user.email.split("@")[0];
@@ -84,7 +92,7 @@ export const UserProfile = () => {
         <ul className="flex flex-col items-start gap-2 *:inline-flex *:gap-2 *:items-center *:border-b-[1.5px] *:border-b-stone-700 *:border-dotted *:text-xs *:font-semibold *:text-[#434955] pb-3">
           <li className="flex items-center gap-2">
             <Phone size={15} className="text-stone-700 group-hover:text-[#58b0e0]" />
-            <p>N/A</p>
+            <p>{user.phone || "N/A"}</p>
           </li>
           <li className="flex items-center gap-2">
             <Mail size={15} className="text-stone-700 group-hover:text-[#58b0e0]" />

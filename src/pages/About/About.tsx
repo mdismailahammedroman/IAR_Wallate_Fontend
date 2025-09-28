@@ -3,7 +3,7 @@ import Jane from '../../assets/about/Jane Smith.jpeg';
 import John from '../../assets/about/John Doe1.jpg';
 import Sara from '../../assets/about/Sara Lee.jpeg';
 
-export const About = () => {
+ const About = () => {
   return (
     <div className="max-w-7xl mx-auto py-12">
       {/* Service Story */}
@@ -120,3 +120,4 @@ export const About = () => {
     </div>
   );
 };
+export default About

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
-export const FAQ = () => {
+ const FAQ = () => {
   const faqData = [
     { question: 'What is a Digital Wallet?', answer: 'A digital wallet securely stores payment info for easy transactions on websites and apps.' },
     { question: 'How do I create an account?', answer: 'Download the app, sign up with your phone/email, and start using the wallet.' },
@@ -67,3 +67,4 @@ export const FAQ = () => {
     </div>
   );
 };
+export default FAQ

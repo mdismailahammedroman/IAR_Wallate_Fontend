@@ -41,7 +41,7 @@ interface RegisterFormProps {
   className?: string;
 }
 
-export function RegisterForm({ role, className }: RegisterFormProps) {
+ function RegisterForm({ role, className }: RegisterFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userRegister] = useUserRegisterMutation();
   const [agentRegister] = useAgentRegisterMutation();
@@ -198,3 +198,4 @@ export function RegisterForm({ role, className }: RegisterFormProps) {
     </motion.div>
   );
 }
+export default RegisterForm

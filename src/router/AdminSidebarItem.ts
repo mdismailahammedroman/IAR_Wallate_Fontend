@@ -1,5 +1,5 @@
 
-import { Analytics } from "@/pages/admin/Analytics";
+import Analytics from "@/pages/admin/Analytics";
 import { UserProfile } from "@/pages/user/UserProfile";
 import type { ISidebarItem } from "@/types";
 
