@@ -1,3 +1,5 @@
+import  { useMemo } from "react";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -10,52 +12,69 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Link } from "react-router";
 import {
   authApi,
   useLogoutMutation,
   useUserInfoQuery,
 } from "@/redux/features/auth/auth.api";
 import { useAppDispatch } from "@/redux/hook";
-import React from "react";
 import { role } from "@/constants/roles";
 import ModeToggle from "./mode.toggle";
 
-// Navigation links array to be used in both desktop and mobile menus
-const navigationLinks = [
-
-    { href: "/", label: "Home", roles: ["PUBLIC"] },
-    { href: "/about", label: "About", roles: ["PUBLIC"] },
-    { href: "/faq", label: "Faq", roles: ["PUBLIC"] },
-  { href: "/admin", label: "Dashboard", role: role.ADMIN },
-  { href: "/admin", label: "Dashboard", role: role.SUPER_ADMIN },
-  { href: "/user", label: "Dashboard", role: role.USER },
-  { href: "/user", label: "Dashboard", role: role.AGENT },
+// Original navigation links (public only)
+const baseLinks = [
+  { href: "/", label: "Home", role: "PUBLIC" },
+  { href: "/about", label: "About", role: "PUBLIC" },
+  { href: "/faq", label: "FAQ", role: "PUBLIC" },
 ];
+
+// Role-based dashboard routing
+const roleDashboards = {
+  [role.ADMIN]: "/admin",
+  [role.SUPER_ADMIN]: "/admin",
+  [role.USER]: "/user",
+  [role.AGENT]: "/user",
+};
 
 export default function Navbar() {
   const { data } = useUserInfoQuery(undefined);
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
 
+  const userRole = data?.data?.role;
+  const userEmail = data?.data?.email;
+
   const handleLogout = async () => {
     await logout(undefined);
+    localStorage.clear();
     dispatch(authApi.util.resetApiState());
+    
   };
 
+  const filteredLinks = useMemo(() => {
+    const links = [...baseLinks];
+
+    if (userRole && userRole in roleDashboards) {
+  links.push({
+    href: roleDashboards[userRole as keyof typeof roleDashboards],
+    label: "Dashboard",
+    role: userRole,
+  });
+}
+
+
+    return links;
+  }, [userRole]);
+
   return (
-      <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-900 text-white dark:text-gray-200 shadow-md">
-      <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-700 text-white dark:text-gray-200 shadow-md">
+      <div className="container mx-auto px-4 flex h-16 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex items-center gap-2">
-          {/* Mobile menu trigger */}
+          {/* Mobile menu */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                className="group size-8 md:hidden"
-                variant="ghost"
-                size="icon"
-              >
+              <Button className="group size-8 md:hidden" variant="ghost" size="icon">
                 <svg
                   className="pointer-events-none"
                   width={16}
@@ -66,11 +85,10 @@ export default function Navbar() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     d="M4 12L20 12"
-                    className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
+                    className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:rotate-[315deg]"
                   />
                   <path
                     d="M4 12H20"
@@ -78,18 +96,18 @@ export default function Navbar() {
                   />
                   <path
                     d="M4 12H20"
-                    className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+                    className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:rotate-[135deg]"
                   />
                 </svg>
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-36 p-1 md:hidden">
               <NavigationMenu className="max-w-none *:w-full">
-                <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
-                  {navigationLinks.map((link, index) => (
-                    <NavigationMenuItem key={index} className="w-full">
+                <NavigationMenuList className="flex-col items-start gap-0">
+                  {filteredLinks.map((link, idx) => (
+                    <NavigationMenuItem key={idx} className="w-full">
                       <NavigationMenuLink asChild className="py-1.5">
-                        <Link to={link.href}>{link.label} </Link>
+                        <Link to={link.href}>{link.label}</Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   ))}
@@ -97,61 +115,55 @@ export default function Navbar() {
               </NavigationMenu>
             </PopoverContent>
           </Popover>
-          {/* Main nav */}
+
+          {/* Logo + desktop menu */}
           <div className="flex items-center gap-6">
-           <Link to="/" className="text-2xl font-bold hover:text-indigo-300">
-          IAR-WalletPro
-        </Link>
-            {/* Navigation menu */}
+            <h1 className="text-oklch hover:text-primary/90 font-bold text-2xl">
+              IAR Wallet
+            </h1>
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
-                {navigationLinks.map((link, index) => (
-                  <React.Fragment key={index}>
-                    {link.role === "PUBLIC" && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink
-                          asChild
-                          className="text-background hover:text-primary py-1.5 font-medium"
-                        >
-                          <Link to={link.href}>{link.label}</Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-                    {link.role === data?.data?.role && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink
-                          asChild
-                          className="text-background hover:text-primary py-1.5 font-medium"
-                        >
-                          <Link to={link.href}>{link.label}</Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-                  </React.Fragment>
+                {filteredLinks.map((link, idx) => (
+                  <NavigationMenuItem key={idx}>
+                    <NavigationMenuLink
+                      asChild
+                      className="text-oklch hover:text-primary py-1.5 font-medium"
+                    >
+                      <Link to={link.href}>{link.label}</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
             </NavigationMenu>
           </div>
         </div>
+
         {/* Right side */}
         <div className="flex items-center gap-2">
           <ModeToggle />
-          {data?.data?.email && (
+
+          {userEmail ? (
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="text-sm"
+              className="text-sm text-gray-950"
             >
               Logout
             </Button>
-          )}
-          {!data?.data?.email && (
+          ) : (
             <Button asChild className="text-sm">
               <Link to="/auth/login">Login</Link>
             </Button>
           )}
+
+          {/* Sign Up Role Selector */}
+          {!userEmail &&
+            <Button asChild className="text-sm">
+              <Link to="/user/regiser">sign up</Link>
+            </Button>
+          }
         </div>
-      </nav>
+      </div>
     </header>
   );
 }

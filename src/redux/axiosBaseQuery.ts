@@ -22,6 +22,7 @@ import type { AxiosRequestConfig, AxiosError } from 'axios'
         data,
         params,
         headers,
+         withCredentials: true,
       })
       return { data: result.data }
     } catch (axiosError) {

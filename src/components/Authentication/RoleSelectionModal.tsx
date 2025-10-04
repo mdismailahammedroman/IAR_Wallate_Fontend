@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import {
   Dialog,
   DialogTrigger,
@@ -7,7 +8,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router";
 
 type Role = "user" | "agent";
 type Action = "login" | "register";
@@ -16,19 +16,21 @@ interface RoleSelectionModalProps {
   action: Action;
 }
 
- function RoleSelectionModal({ action }: RoleSelectionModalProps) {
+function RoleSelectionModal({ action }: RoleSelectionModalProps) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSelect = (role: Role) => {
     setOpen(false);
 
-   if (role === "user") {
-  navigate(`/user/register`);
-} else {
-  navigate(`/agent/agent-register`);
-}
-
+    // Custom route handling based on role and action
+    if (role === "agent") {
+      const path = action === "register" ? "/agent/agent-register" : "/agent/login";
+      navigate(path);
+    } else {
+      // For users
+      navigate(`/user/${action}`);
+    }
   };
 
   return (
@@ -46,14 +48,14 @@ interface RoleSelectionModalProps {
           <Button
             onClick={() => handleSelect("user")}
             variant="outline"
-            aria-label="Register or Login as User"
+            aria-label={`Continue as User to ${action}`}
           >
             I’m a User
           </Button>
           <Button
             onClick={() => handleSelect("agent")}
             variant="outline"
-            aria-label="Register or Login as Agent"
+            aria-label={`Continue as Agent to ${action}`}
           >
             I’m an Agent
           </Button>
@@ -62,4 +64,5 @@ interface RoleSelectionModalProps {
     </Dialog>
   );
 }
-export default RoleSelectionModal
+
+export default RoleSelectionModal;

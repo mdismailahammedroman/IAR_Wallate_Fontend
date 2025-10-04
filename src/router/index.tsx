@@ -2,13 +2,12 @@ import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 
 import { withAuth } from "@/utils/withAuth";
-import { role } from "@/constants/roles";
-import type { TRole } from "@/types";
 
-import { userSidebarItems } from "./userSidebarItems";
+// import { userSidebarItems } from "./userSidebarItems";
 import { adminSidebarItems } from "./AdminSidebarItem";
-import { agentSidebarItems } from "./agentSidebar";
 import { generateRoutes } from "@/utils/generateRoutes";
+import { userSidebarItems } from "./userSidebarItems";
+import { role } from "@/constants/roles";
 
 // Lazy-loaded components
 const App = lazy(() => import("@/App"));
@@ -39,52 +38,28 @@ const router = createBrowserRouter([
       { path: "faq", element: <FAQ />},
     ],
   },
-
-  {
-    path: "/admin",
-    Component:  withAuth(DashboardLayout, role.ADMIN as TRole),
-    children: [
-      { index: true, element: <Navigate to="/admin/analytics" /> },
-      ...generateRoutes(adminSidebarItems),
-    ],
-  },
-  {
-    path: "/admin",
-    Component:  withAuth(DashboardLayout, role.SUPER_ADMIN as TRole),
-    children: [
-      { index: true, element: <Navigate to="/admin/analytics" /> },
-      ...generateRoutes(adminSidebarItems),
-    ],
-  },
-
-  {
-    path: "/agent",
-    Component: 
-      withAuth(DashboardLayout, role.AGENT as TRole),
-    children: [
-      { index: true, element: <Navigate to="/agent/me" /> },
-      ...generateRoutes(agentSidebarItems),
-    ],
-  },
-
-  {
-    path: "/user",
-    Component:
-      withAuth(DashboardLayout, role.USER as TRole),
-    children: [
-      { index: true, element: <Navigate to="/user/bookings" /> },
-      ...generateRoutes(userSidebarItems),
-    ],
-  },
+{
+  Component: withAuth(DashboardLayout, [role.ADMIN, role.SUPER_ADMIN]),
+  path: "/admin",
+  children: [
+    { index: true, element: <Navigate to="/admin/analytics" /> },
+    ...generateRoutes(adminSidebarItems),
+  ],
+},
+{
+  Component: withAuth(DashboardLayout, [role.AGENT, role.USER]),
+  path: "/user",
+  children: [
+    { index: true, element: <Navigate to="/user/me" /> },
+    ...generateRoutes(userSidebarItems),
+  ],
+},
 
   {
     path: "/user/register",
-    element: <RegisterForm role="USER" />,
+    element: <RegisterForm/>,
   },
-  {
-    path: "/agent/agent-register",
-    element: <RegisterForm role="AGENT" />,
-  },
+
   {
     path: "/auth/login",
     element: <LoginForm />,

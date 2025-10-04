@@ -18,16 +18,26 @@ import { Button } from "../ui/button";
 import Password from "../ui/Password";
 import { toast } from "sonner";
 import Lottie from "react-lottie";
-import { useUserRegisterMutation, useAgentRegisterMutation } from "@/redux/features/auth/auth.api";
+import { useUserRegisterMutation } from "@/redux/features/auth/auth.api";
 import type { IRegisterPayload } from "@/types";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
-// ✅ Removed role from schema
+
+
+const roles = ["USER", "AGENT"] as const;
+
+// Infer Role type
+export type Role = typeof roles[number];
+
 const registerSchema = z
   .object({
     name: z.string().min(2, "Name is required"),
     email: z.string().email("Enter a valid email"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Confirm password is required"),
+     role: z.enum(roles, {
+    message: "Role is required", 
+  }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -36,15 +46,11 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-interface RegisterFormProps {
-  role: "USER" | "AGENT";
-  className?: string;
-}
 
- function RegisterForm({ role, className }: RegisterFormProps) {
+
+function RegisterForm({ className }: { className?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userRegister] = useUserRegisterMutation();
-  const [agentRegister] = useAgentRegisterMutation();
   const navigate = useNavigate();
 
   const form = useForm<RegisterFormData>({
@@ -54,6 +60,7 @@ interface RegisterFormProps {
       email: "",
       password: "",
       confirmPassword: "",
+      role: undefined,
     },
   });
 
@@ -65,15 +72,11 @@ interface RegisterFormProps {
       email: data.email.trim().toLowerCase(),
       password: data.password,
       confirmPassword: data.confirmPassword,
-      role, // ✅ use role from props
+     role: data.role,
     };
 
     try {
-      if (role === "AGENT") {
-        await agentRegister(userInfo).unwrap();
-      } else {
-        await userRegister(userInfo).unwrap();
-      }
+      await userRegister(userInfo).unwrap();
       toast.success("User created successfully");
       navigate("/verify", { state: data.email });
     } catch (error: any) {
@@ -111,7 +114,7 @@ interface RegisterFormProps {
             animate={{ x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {role === "AGENT" ? "Register as Agent" : "Register as User"}
+            Register Agent and User
           </motion.h2>
 
           <FormProvider {...form}>
@@ -176,6 +179,30 @@ interface RegisterFormProps {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Role</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="USER">User</SelectItem>
+                          <SelectItem value="AGENT">Agent</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Registering..." : "Register"}
