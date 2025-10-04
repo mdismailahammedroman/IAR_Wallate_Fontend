@@ -22,16 +22,7 @@ export const authApi = baseApi.injectEndpoints({
         data: userInfo,
       }),
     }),
-    agentRegister: builder.mutation<
-      IResponse<ILoginAndRegister>,
-      IRegisterPayload
-    >({
-      query: (userInfo) => ({
-        url: "/agent/agent-register",
-        method: "POST",
-        data: userInfo,
-      }),
-    }),
+
     login: builder.mutation<IResponse<ILoginRespons>, ILoginPayload>({
       query: (userInfo) => ({
         url: "/auth/login",
@@ -65,15 +56,10 @@ export const authApi = baseApi.injectEndpoints({
     url: "/user/me",
     method: "GET",
   }),
+  providesTags: ["USER"],
 }),
 
-// AGENT: GET /agent/me
-getAgentInfo: builder.query<IResponse<ILoginAndRegister>, void>({
-  query: () => ({
-    url: "/agent/me",
-    method: "GET",
-  }),
-}),
+
 
     updateUser: builder.mutation<IResponse<ILoginAndRegister>, { id: string; updateData: UpdateUserPayload }>({
       query: ({ id, updateData }) => ({
@@ -81,19 +67,16 @@ getAgentInfo: builder.query<IResponse<ILoginAndRegister>, void>({
         method: "PATCH",
         body: updateData, // ✅ Use 'body' instead of 'data'
       }),
-      invalidatesTags: ["USER", "AGENT", "ADMIN"],
     }),
   }),
 });
 
 export const {
   useUserRegisterMutation,
-  useAgentRegisterMutation,
   useLoginMutation,
   useLogoutMutation,
   useSendOtpMutation,
   useVerifyOtpMutation,
   useUserInfoQuery,
   useUpdateUserMutation,
-  useGetAgentInfoQuery,
 } = authApi;

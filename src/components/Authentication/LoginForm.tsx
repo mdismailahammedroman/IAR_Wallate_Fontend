@@ -23,7 +23,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "superadmin@gmail.com",
-      password: "Ismail@476245",
+      password: "Ismail@47",
     },
   });
 
@@ -33,20 +33,23 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
   try {
     const response = await login(data).unwrap(); // ✅ Use form data
 
-    const { accessToken, user } = response.data;
+    const { user } = response.data;
+console.log(user.role);
 
     if (!user?.role) {
       console.error("Missing role in login response");
       return;
     }
 
-    // Store auth details
-    localStorage.setItem("token", accessToken);
     localStorage.setItem("role", user.role);
 
+// Then navigate somewhere appropriate
+if (user.role === "AGENT") {
+  navigate("/agent/profileinfo");
+} else {
+  navigate("/user/me");
+}
       navigate("/");
-    
-
   } catch (err: any) {
     console.error("Login error:", err);
 
@@ -136,7 +139,7 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
 
           <p className="text-center text-sm mt-4 text-gray-800">
             Don't have an account?{" "}
-            <Link to="/register" className="text-indigo-600 cursor-pointer">
+            <Link to="/user/register" className="text-indigo-600 cursor-pointer">
                      
               Sign Up
             </Link>

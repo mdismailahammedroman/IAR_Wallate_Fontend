@@ -77,6 +77,10 @@ export type UpdateUserPayload = {
   dateOfBirth?: string;
 };
 export interface IResponse<T> {
+  avatar: string | undefined;
+  email: string;
+  isActive: string;
+  role: string;
   name: string;
   statusCode: number;
   success: boolean;
