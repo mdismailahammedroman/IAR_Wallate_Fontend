@@ -65,7 +65,7 @@ export const authApi = baseApi.injectEndpoints({
       query: ({ id, updateData }) => ({
         url: `/user/${id}`,
         method: "PATCH",
-        body: updateData, // ✅ Use 'body' instead of 'data'
+        data: updateData, // ✅ Use 'body' instead of 'data'
       }),
     }),
   }),

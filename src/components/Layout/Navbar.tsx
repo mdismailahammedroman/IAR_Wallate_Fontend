@@ -43,6 +43,7 @@ export default function Navbar() {
 
   const userRole = data?.data?.role;
   const userEmail = data?.data?.email;
+console.log(data?.data);
 
   const handleLogout = async () => {
     await logout(undefined);
