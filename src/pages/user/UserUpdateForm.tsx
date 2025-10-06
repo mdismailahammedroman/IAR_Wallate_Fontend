@@ -48,7 +48,9 @@ export const UserUpdateForm: React.FC = () => {
       return;
     }
     try {
-      await updateUser({ id: user._id, updateData: formData }).unwrap();
+      await updateUser({ updateData: formData }).unwrap();
+      console.log(formData);
+      
       toast.success('Profile updated successfully!');
     } catch (error: any) {
       toast.error(error?.data?.message || 'Failed to update profile.');

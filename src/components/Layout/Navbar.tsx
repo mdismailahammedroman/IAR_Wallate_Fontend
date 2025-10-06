@@ -37,9 +37,12 @@ const roleDashboards = {
 };
 
 export default function Navbar() {
-  const { data } = useUserInfoQuery(undefined);
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
+
+  const { data, isLoading, isError, error } = useUserInfoQuery(undefined);
+
+console.log("User Info Response:", { data, isLoading, isError, error });
 
   const userRole = data?.data?.role;
   const userEmail = data?.data?.email;
