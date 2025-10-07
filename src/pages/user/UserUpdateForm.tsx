@@ -35,8 +35,7 @@ export const UserUpdateForm: React.FC = () => {
         phone: user.phone || '',
         address: user.address || '',
         profileImage: user.profileImage || '',
-        // Date of Birth: if ISO string exists, convert to YYYY-MM-DD format for <input type="date" />
-        dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
+
       });
     }
   }, [user, reset]);
@@ -65,12 +64,7 @@ export const UserUpdateForm: React.FC = () => {
       <Input {...register('name')} placeholder="Name" required />
       <Input {...register('phone')} placeholder="Phone" />
       <Input {...register('address')} placeholder="Address" />
-      <Input
-        {...register('dateOfBirth')}
-        type="date"
-        placeholder="Date of Birth"
-        max={new Date().toISOString().split('T')[0]}
-      />
+     
       <Input {...register('profileImage')} placeholder="Profile Image URL" />
 
       <Button type="submit" disabled={isUpdating}>

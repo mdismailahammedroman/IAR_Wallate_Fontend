@@ -163,7 +163,7 @@ console.log(data?.data);
           {/* Sign Up Role Selector */}
           {!userEmail &&
             <Button asChild className="text-sm">
-              <Link to="/user/regiser">sign up</Link>
+              <Link to="/user/register">sign up</Link>
             </Button>
           }
         </div>
