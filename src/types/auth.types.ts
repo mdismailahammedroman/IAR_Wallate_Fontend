@@ -88,6 +88,14 @@ export interface IResponse<T> {
   data: T;
 }
 
+export interface ISearchedUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+
 
 
 // src/types/ApiError.ts
