@@ -37,12 +37,16 @@ const roleDashboards = {
 };
 
 export default function Navbar() {
-  const { data } = useUserInfoQuery(undefined);
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
 
+  const { data, isLoading, isError, error } = useUserInfoQuery(undefined);
+
+console.log("User Info Response:", { data, isLoading, isError, error });
+
   const userRole = data?.data?.role;
   const userEmail = data?.data?.email;
+console.log(data?.data);
 
   const handleLogout = async () => {
     await logout(undefined);
@@ -159,7 +163,7 @@ export default function Navbar() {
           {/* Sign Up Role Selector */}
           {!userEmail &&
             <Button asChild className="text-sm">
-              <Link to="/user/regiser">sign up</Link>
+              <Link to="/user/register">sign up</Link>
             </Button>
           }
         </div>

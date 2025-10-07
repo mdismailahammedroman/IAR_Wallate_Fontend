@@ -31,18 +31,17 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
   try {
-    const response = await login(data).unwrap(); // ✅ Use form data
+    const response = await login(data).unwrap(); 
 
     const { user } = response.data;
-console.log(user.role);
+
 
     if (!user?.role) {
       console.error("Missing role in login response");
       return;
     }
 
-    localStorage.setItem("role", user.role);
-
+  
 // Then navigate somewhere appropriate
 if (user.role === "AGENT") {
   navigate("/agent/profileinfo");

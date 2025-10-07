@@ -43,7 +43,7 @@ export const UserProfile = () => {
       </CardHeader>
       <CardContent className="flex items-center gap-4">
         <Avatar className="h-16 w-16">
-          <AvatarImage  alt={user.name} />        {/* {user.image} */}
+          <AvatarImage  alt={user.name} src= {user.profileImage}/>     
           <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div>

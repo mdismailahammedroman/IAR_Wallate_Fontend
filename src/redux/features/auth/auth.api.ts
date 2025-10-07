@@ -23,13 +23,13 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    login: builder.mutation<IResponse<ILoginRespons>, ILoginPayload>({
-      query: (userInfo) => ({
-        url: "/auth/login",
-        method: "POST",
-        data: userInfo,
-      }),
-    }),
+  login: builder.mutation<IResponse<ILoginRespons>, ILoginPayload>({
+  query: (userInfo) => ({
+    url: "/auth/login",
+    method: "POST",
+    data: userInfo,
+  }),
+}),
     sendOtp: builder.mutation<IResponse<null>, IsendOtp>({
       query: (userInfo) => ({
         url: "/otp/sendotp",
@@ -61,11 +61,11 @@ export const authApi = baseApi.injectEndpoints({
 
 
 
-    updateUser: builder.mutation<IResponse<ILoginAndRegister>, { id: string; updateData: UpdateUserPayload }>({
-      query: ({ id, updateData }) => ({
-        url: `/user/${id}`,
+    updateUser: builder.mutation<IResponse<ILoginAndRegister>, {updateData: UpdateUserPayload }>({
+      query: ({ updateData }) => ({
+        url: `/user/update`,
         method: "PATCH",
-        body: updateData, // ✅ Use 'body' instead of 'data'
+        data: updateData, // ✅ Use 'body' instead of 'data'
       }),
     }),
   }),

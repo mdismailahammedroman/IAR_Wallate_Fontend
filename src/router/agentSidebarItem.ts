@@ -1,14 +1,13 @@
 
-import { SendMoney } from "@/pages/transaction/SendMoney";
 import { UserProfile } from "@/pages/user/UserProfile";
 import { UserUpdateForm } from "@/pages/user/UserUpdateForm";
 import type { ISidebarItem } from "@/types";
 
 
 
-export const userSidebarItems: ISidebarItem[] = [
+export const agentSidebarItems: ISidebarItem[] = [
   {
-    title: "Personal Info",
+    title: "Agent Personal Info",
     items: [
       {
         title: "Profile",
@@ -27,9 +26,9 @@ export const userSidebarItems: ISidebarItem[] = [
     title: "transaction",
     items: [
       {
-        title: "Send Money",
+        title: "cash in",
         url: "/user/send-money",
-        component:SendMoney,
+        component:UserProfile,
       },
     ],
     
