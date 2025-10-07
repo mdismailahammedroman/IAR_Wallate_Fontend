@@ -5,6 +5,7 @@ import type {
   ILoginRespons,
   IRegisterPayload,
   IResponse,
+  ISearchedUser,
   IsendOtp,
   IverifyOtp,
   UpdateUserPayload,
@@ -23,13 +24,13 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-  login: builder.mutation<IResponse<ILoginRespons>, ILoginPayload>({
-  query: (userInfo) => ({
-    url: "/auth/login",
-    method: "POST",
-    data: userInfo,
-  }),
-}),
+    login: builder.mutation<IResponse<ILoginRespons>, ILoginPayload>({
+      query: (userInfo) => ({
+        url: "/auth/login",
+        method: "POST",
+        data: userInfo,
+      }),
+    }),
     sendOtp: builder.mutation<IResponse<null>, IsendOtp>({
       query: (userInfo) => ({
         url: "/otp/sendotp",
@@ -52,22 +53,35 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["USER"],
     }),
     userInfo: builder.query<IResponse<ILoginAndRegister>, void>({
-  query: () => ({
-    url: "/user/me",
-    method: "GET",
-  }),
-  providesTags: ["USER"],
-}),
+      query: () => ({
+        url: "/user/me",
+        method: "GET",
+      }),
+      providesTags: ["USER"],
+    }),
 
-
-
-    updateUser: builder.mutation<IResponse<ILoginAndRegister>, {updateData: UpdateUserPayload }>({
+    updateUser: builder.mutation<
+      IResponse<ILoginAndRegister>,
+      { updateData: UpdateUserPayload }
+    >({
       query: ({ updateData }) => ({
         url: `/user/update`,
         method: "PATCH",
         data: updateData, // ✅ Use 'body' instead of 'data'
       }),
     }),
+    // Inside authApi.injectEndpoints(...)
+   searchUsers: builder.query<
+  IResponse<ISearchedUser[]>,
+  { name: string; roles: string[] }
+>({
+  query: ({ name, roles }) => ({
+    url: `/user/search`,
+    method: "GET",
+    params: { name, roles: roles.join(",") },
+  }),
+}),
+
   }),
 });
 
@@ -79,4 +93,5 @@ export const {
   useVerifyOtpMutation,
   useUserInfoQuery,
   useUpdateUserMutation,
+  useSearchUsersQuery,
 } = authApi;
