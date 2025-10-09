@@ -18,3 +18,8 @@ export interface ISendMoneyResponse {
   newSenderBalance: number;
   transaction: ITransaction;
 }
+// Request payload for add/withdraw money
+export interface IAmountPayload {
+  amount: number;
+}
+

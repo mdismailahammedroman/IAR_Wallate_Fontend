@@ -87,12 +87,12 @@ export const SendMoney = () => {
 
   return (
 
-    <Card className="max-w-md mx-auto">
+    <Card className="max-w-xl mx-auto">
       <CardHeader>
         <CardTitle>Send Money</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 lg:w-md">
           {/* Search Field */}
           <div>
             <Label>Search User</Label>
@@ -123,7 +123,7 @@ export const SendMoney = () => {
                     .map((user) => (
                       <li
                         key={user._id}
-                        className="cursor-pointer px-3 py-2 hover:bg-gray-100"
+                        className="cursor-pointer px-3 py-2 hover:bg-gray-200"
                         onClick={() => setSelectedUser(user)}
                       >
                         {user.name} ({user.email})
