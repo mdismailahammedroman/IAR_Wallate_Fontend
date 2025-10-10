@@ -12,8 +12,9 @@ import { useUserInfoQuery, useSearchUsersQuery } from "@/redux/features/auth/aut
 import {
     useSendMoneyMutation,
     useAddMoneyMutation,
-    useWithdrawMoneyMutation
+    useWithdrawMoneyMutation,
 } from "@/redux/features/transaction/transaction.api";
+import { useLocation } from "react-router";
 
 type TransactionType = "send" | "add" | "withdraw";
 
@@ -32,15 +33,19 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     const [transactionSummary, setTransactionSummary] = useState<any>(null);
 
     const { data: userData, isLoading: authLoading } = useUserInfoQuery();
+    const currentUserId = userData?.data?._id;
+
+    const shouldSkip = searchTerm.length < 2 || (type !== "send" && type !== "withdraw");
 
     const { data: searchData, isLoading: userSearchLoading } = useSearchUsersQuery(
         { name: searchTerm, roles: ["user", "agent"] },
-        { skip: searchTerm.length < 2 || type !== "send" }
+        { skip: shouldSkip }
     );
 
     const [sendMoney, { isLoading: sending }] = useSendMoneyMutation();
     const [addMoney, { isLoading: adding }] = useAddMoneyMutation();
     const [withdrawMoney, { isLoading: withdrawing }] = useWithdrawMoneyMutation();
+    const location = useLocation();
 
     const {
         register,
@@ -51,11 +56,19 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     } = useForm<IMoneyForm>();
 
     useEffect(() => {
-        if (selectedUser && type === "send") {
+        if (selectedUser && (type === "send" || type === "withdraw")) {
             setValue("receiverId", selectedUser._id);
             setSearchTerm(selectedUser.name);
         }
     }, [selectedUser, setValue, type]);
+
+    useEffect(() => {
+    setTransactionSummary(null);
+    reset(); // reset form fields
+    setSelectedUser(null);
+    setSearchTerm("");
+}, [location.pathname, reset]);
+
 
     if (authLoading) return <p className="text-center mt-4">Checking authentication...</p>;
 
@@ -63,9 +76,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
         return <div className="text-center mt-4 text-red-500">You must be logged in to use this feature.</div>;
     }
 
-    const currentUserId = userData?.data._id;
-
-    const onSubmit = async (data: IMoneyForm) => {
+    const onSubmit = async (formData: IMoneyForm) => {
         try {
             let response: any;
 
@@ -82,37 +93,91 @@ export const MoneyTransactionForm = ({ type }: Props) => {
 
                 response = await sendMoney({
                     receiverId: selectedUser._id,
-                    amount: data.amount,
+                    amount: formData.amount,
                 }).unwrap();
+
+                const tx = response?.data?.transaction;
+                const amount = tx?.amount || formData.amount;
+
+                setTransactionSummary({
+                    type,
+                    transactionId: tx?.transactionId || "N/A",
+                    createdAt: tx?.createdAt || null,
+                    amount,
+                    sender: tx?.fromUser || userData.data,
+                    receiver: tx?.toUser || tx?.toAgent || selectedUser,
+                    senderPrevBalance: response.data.newSenderBalance - amount,
+                    senderNewBalance: response.data.newSenderBalance,
+                    receiverPrevBalance: response.data.newReceiverBalance - amount,
+                    receiverNewBalance: response.data.newReceiverBalance,
+                });
             }
-            console.log("Transaction API response:", response);
 
             if (type === "add") {
-                response = await addMoney({ amount: data.amount }).unwrap();
+                response = await addMoney({ amount: formData.amount }).unwrap();
+
+                const tx = response?.transaction || {};
+                const amount = tx?.amount ?? formData.amount;
+                const newBalance = response?.balance ?? null;
+                const transactionId = tx?.transactionId ?? "N/A";
+                const createdAt = tx?.createdAt ?? null;
+
+                setTransactionSummary({
+                    type,
+                    transactionId,
+                    createdAt,
+                    amount,
+                    sender: userData.data,
+                    senderPrevBalance: newBalance - amount,
+                    senderNewBalance: newBalance,
+                });
+
+                return;
             }
 
             if (type === "withdraw") {
-                response = await withdrawMoney({ amount: data.amount }).unwrap();
+                  if (!selectedUser) {
+                    toast.error("Please select a user from the search results.");
+                    return;
+                }
+
+                if (selectedUser._id === currentUserId) {
+                    toast.error("You cannot withdraw to your own account.");
+                    return;
+                }
+                if (!formData.amount || formData.amount <= 0) {
+                    toast.error("Please enter a valid amount.");
+                    return;
+                }
+
+                response = await withdrawMoney({
+                    amount: formData.amount,
+                    agentId: selectedUser._id,
+                }).unwrap();
+
+                const tx = response?.data?.transaction;
+                const amount = tx?.amount || formData.amount;
+
+                setTransactionSummary({
+                    type,
+                    transactionId: tx?.transactionId || "N/A",
+                    createdAt: tx?.createdAt || null,
+                    amount,
+                    sender: tx?.fromUser || userData.data,
+                    receiver: tx?.toAgent || selectedUser,
+                    senderPrevBalance: response.data.userBalance - amount,
+                    senderNewBalance: response.data.userBalance,
+                    receiverPrevBalance: response.data.agentBalance - amount,
+                    receiverNewBalance: response.data.agentBalance,
+                });
             }
 
             toast.success(response.message || "Transaction successful!");
-            setTransactionSummary({
-                type,
-                transactionId: response.data.transaction.transactionId,
-                createdAt: response.data.transaction.createdAt,
-                amount: response.data.transaction.amount,
-                sender: response.data.transaction.fromUser,
-                receiver: response.data.transaction.toUser,
-                senderPrevBalance: response.data.newSenderBalance - response.data.transaction.amount,
-                senderNewBalance: response.data.newSenderBalance,
-            });
-
-
-
             reset();
             setSelectedUser(null);
             setSearchTerm("");
         } catch (error: any) {
+            console.error("Transaction error:", error);
             toast.error(error?.data?.message || "Transaction failed.");
         }
     };
@@ -126,53 +191,66 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     }[type];
 
     return (
-        <Card className="max-w-xl mx-auto">
+        <Card className="w-full lg:max-w-xl mx-auto">
             <CardHeader>
                 <CardTitle>{renderTitle}</CardTitle>
             </CardHeader>
             <CardContent>
                 {!transactionSummary ? (
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        {/* User Search for Send */}
-                        {type === "send" && (
+                        {(type === "send" || type === "withdraw") && (
                             <div>
-                                <Label>Search User</Label>
+                                <Label>{type === "send" ? "Search User" : "Search Agent (by name or email)"}</Label>
                                 <Input
-                                    placeholder="Search by name..."
+                                    placeholder="Search by name or email..."
                                     value={searchTerm}
                                     onChange={(e) => {
                                         setSearchTerm(e.target.value);
                                         setSelectedUser(null);
                                     }}
                                 />
-                                {searchTerm.length >= 2 &&
-                                    !selectedUser &&
-                                    !userSearchLoading &&
-                                    (searchData?.data?.length ?? 0) === 0 && (
-                                        <p className="text-sm text-red-500 mt-1">No users found.</p>
-                                    )}
 
-                                {searchTerm.length >= 2 &&
-                                    !selectedUser &&
-                                    (searchData?.data?.length ?? 0) > 0 && (
-                                        <ul className="bg-white border rounded shadow max-h-40 overflow-y-auto mt-1 z-10 relative">
-                                            {searchData?.data
-                                                ?.filter((user) => user._id !== currentUserId)
-                                                .map((user) => (
-                                                    <li
-                                                        key={user._id}
-                                                        className="cursor-pointer px-3 py-2 hover:bg-gray-200"
-                                                        onClick={() => setSelectedUser(user)}
-                                                    >
-                                                        {user.name} ({user.email})
-                                                    </li>
-                                                ))}
-                                        </ul>
-                                    )}
+                                {/* Show selected user/agent */}
+                                {selectedUser && (
+                                    <p className="text-sm text-green-600 mt-1">
+                                        ✅ Selected: {selectedUser.name} ({selectedUser.email}){" "}
+                                        <Button
+                                            type="button"
+                                            variant="link"
+                                            className="text-xs text-red-500"
+                                            onClick={() => {
+                                                setSelectedUser(null);
+                                                setSearchTerm("");
+                                            }}
+                                        >
+                                            Clear
+                                        </Button>
+                                    </p>
+                                )}
+
+                                {/* Show results */}
+                                {searchTerm.length >= 2 && !selectedUser && !userSearchLoading && (searchData?.data?.length ?? 0) === 0 && (
+                                    <p className="text-sm text-red-500 mt-1">No matches found.</p>
+                                )}
+
+                                {searchTerm.length >= 2 && !selectedUser && (searchData?.data?.length ?? 0) > 0 && (
+                                    <ul className="bg-white border rounded shadow max-h-40 overflow-y-auto mt-1 z-10 relative">
+                                        {searchData?.data
+                                            ?.filter((user) => user._id !== currentUserId)
+                                            .map((user) => (
+                                                <li
+                                                    key={user._id}
+                                                    className="cursor-pointer px-3 py-2 hover:bg-gray-200"
+                                                    onClick={() => setSelectedUser(user)}
+                                                >
+                                                    {user.name} ({user.email})
+                                                </li>
+                                            ))}
+                                    </ul>
+                                )}
                             </div>
                         )}
 
-                        {/* Amount Field */}
                         <div>
                             <Label>Amount</Label>
                             <Input
@@ -193,25 +271,29 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                 ) : (
                     <>
                         <h3 className="text-lg font-semibold text-green-600 mb-2">Transaction Successful</h3>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             <div>
-                             <p><strong>Transaction ID:</strong> {transactionSummary.transactionId ?? "N/A"}</p>
-<p><strong>Date:</strong> {transactionSummary.createdAt ? new Date(transactionSummary.createdAt).toLocaleString() : "N/A"}</p>
-<p><strong>Amount:</strong> ${transactionSummary.amount ?? "N/A"}</p>
-
+                                <p><strong>Transaction ID:</strong> {transactionSummary.transactionId}</p>
+                                <p><strong>Date:</strong> {transactionSummary.createdAt ? new Date(transactionSummary.createdAt).toLocaleString() : "N/A"}</p>
+                                <p><strong>Amount:</strong> ${transactionSummary.amount}</p>
                             </div>
 
                             <div>
-                                <p><strong>Sender:</strong> {transactionSummary.sender.name} </p>
-                                <p><strong>Sender email:</strong> ({transactionSummary.sender.email})</p>
-                                <p><strong>Sender Previous Balance:</strong> ${transactionSummary.senderPrevBalance}</p>
-                                <p><strong>Sender Current Balance:</strong> ${transactionSummary.senderNewBalance}</p>
+                                <p><strong>Sender:</strong> {transactionSummary.sender?.name}</p>
+                                <p><strong>Sender Email:</strong> {transactionSummary.sender?.email}</p>
+                                <p><strong>Sender Previous Balance:</strong> ${transactionSummary.senderPrevBalance ?? "N/A"}</p>
+                                <p><strong>Sender Current Balance:</strong> ${transactionSummary.senderNewBalance ?? "N/A"}</p>
                             </div>
 
-                            {type === "send" && transactionSummary.receiver && (
+                            {transactionSummary.receiver && type !== "add" && (
                                 <div>
-                                    <p><strong>Receiver:</strong> {transactionSummary.receiver.name} ({transactionSummary.receiver.email})</p>
+                                    <p><strong>Receiver:</strong> {transactionSummary.receiver?.name} ({transactionSummary.receiver?.email})</p>
+                                    {transactionSummary.receiverPrevBalance && (
+                                        <p><strong>Receiver Previous Balance:</strong> ${transactionSummary.receiverPrevBalance}</p>
+                                    )}
+                                    {transactionSummary.receiverNewBalance && (
+                                        <p><strong>Receiver Current Balance:</strong> ${transactionSummary.receiverNewBalance}</p>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -3,7 +3,8 @@ import type { IResponse } from "@/types";
 import type {
   ISendMoneyPayload,
   IAmountPayload,
-  ITransactionResponse
+  ITransactionResponse,
+  IWithdrawPayload
 } from "@/types/transaction.types";
 
 export const transactionApi = baseApi.injectEndpoints({
@@ -22,7 +23,7 @@ export const transactionApi = baseApi.injectEndpoints({
         data,
       }),
     }),
-    withdrawMoney: builder.mutation<IResponse<ITransactionResponse>, IAmountPayload>({
+    withdrawMoney: builder.mutation<IResponse<ITransactionResponse>, IWithdrawPayload>({
       query: (data) => ({
         url: "/transactions/withdraw",
         method: "POST",

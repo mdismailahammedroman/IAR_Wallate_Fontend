@@ -42,11 +42,10 @@ export default function Navbar() {
 
   const { data, isLoading, isError, error } = useUserInfoQuery(undefined);
 
-console.log("User Info Response:", { data, isLoading, isError, error });
+console.log("User Info Response:", { isLoading, isError, error });
 
   const userRole = data?.data?.role;
   const userEmail = data?.data?.email;
-console.log(data?.data);
 
   const handleLogout = async () => {
     await logout(undefined);

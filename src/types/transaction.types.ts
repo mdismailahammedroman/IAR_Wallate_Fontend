@@ -21,5 +21,23 @@ export interface ISendMoneyResponse {
 // Request payload for add/withdraw money
 export interface IAmountPayload {
   amount: number;
+  agentIdentifier?: string;
+  
+}
+export interface IWithdrawPayload {
+  amount: number;
+  agentId: string;
+
 }
 
+
+
+export interface ITransactionResponse {
+  transactionId: string;
+  createdAt: string;
+  amount: number;
+  senderPrevBalance: number;
+  senderNewBalance: number;
+  receiverPrevBalance?: number;
+  receiverNewBalance?: number;
+}
