@@ -96,9 +96,13 @@ export interface ISearchedUser {
 }
 
 
+export interface IUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
-
-// src/types/ApiError.ts
 
 export interface ApiError {
   status: number;

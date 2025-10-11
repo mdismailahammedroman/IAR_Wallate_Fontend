@@ -1,36 +1,49 @@
+import type { IUser } from "./auth.types";
+
+// --- Payload Interfaces ---
 export interface ISendMoneyPayload {
   receiverId: string;
   amount: number;
 }
 
+export interface IAmountPayload {
+  amount: number;
+  agentIdentifier?: string; // Optional for addMoney
+}
+
+export interface IWithdrawPayload {
+  amount: number;
+  agentId: string;
+}
+
+// --- Wallet Interface ---
+export interface IWallet {
+  _id: string;
+  user: IUser;
+  balance: number;
+  status: "ACTIVE" | "INACTIVE";
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- Transaction Interface ---
 export interface ITransaction {
   _id: string;
-  transactionType: string;
-  fromUser?: { _id: string; name: string; email: string; role: string };
-  toUser?: { _id: string; name: string; email: string; role: string };
+  transactionType: "SEND" | "WITHDRAW" | "DEPOSIT"; // Add union if known
+  fromUser?: IUser;
+  toUser?: IUser;
+  toAgent?: IUser;
   amount: number;
-  status: string;
+  status: "PENDING" | "COMPLETED" | "FAILED"; // Improve typing
   createdAt: string;
 }
 
+// --- Transaction Response ---
 export interface ISendMoneyResponse {
   message: string;
   newSenderBalance: number;
   transaction: ITransaction;
 }
-// Request payload for add/withdraw money
-export interface IAmountPayload {
-  amount: number;
-  agentIdentifier?: string;
-  
-}
-export interface IWithdrawPayload {
-  amount: number;
-  agentId: string;
-
-}
-
-
 
 export interface ITransactionResponse {
   transactionId: string;
@@ -40,4 +53,11 @@ export interface ITransactionResponse {
   senderNewBalance: number;
   receiverPrevBalance?: number;
   receiverNewBalance?: number;
+}
+
+// --- Paged Transaction API Response ---
+export interface ITransactionListResponse {
+  transactions: ITransaction[];
+  total: number;
+  limit: number;
 }

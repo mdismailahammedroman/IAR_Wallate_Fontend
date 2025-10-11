@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton"; // ✅ Skeleton added
 
 import { useUserInfoQuery, useSearchUsersQuery } from "@/redux/features/auth/auth.api";
 import {
@@ -63,14 +64,23 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     }, [selectedUser, setValue, type]);
 
     useEffect(() => {
-    setTransactionSummary(null);
-    reset(); // reset form fields
-    setSelectedUser(null);
-    setSearchTerm("");
-}, [location.pathname, reset]);
+        setTransactionSummary(null);
+        reset();
+        setSelectedUser(null);
+        setSearchTerm("");
+    }, [location.pathname, reset]);
 
-
-    if (authLoading) return <p className="text-center mt-4">Checking authentication...</p>;
+    // ✅ Skeleton UI for loading auth state
+    if (authLoading) {
+        return (
+            <Card className="w-full lg:max-w-xl mx-auto p-6 space-y-4">
+                <Skeleton className="h-6 w-1/3" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-1/2" />
+            </Card>
+        );
+    }
 
     if (!userData?.data) {
         return <div className="text-center mt-4 text-red-500">You must be logged in to use this feature.</div>;
@@ -119,13 +129,11 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                 const tx = response?.transaction || {};
                 const amount = tx?.amount ?? formData.amount;
                 const newBalance = response?.balance ?? null;
-                const transactionId = tx?.transactionId ?? "N/A";
-                const createdAt = tx?.createdAt ?? null;
 
                 setTransactionSummary({
                     type,
-                    transactionId,
-                    createdAt,
+                    transactionId: tx?.transactionId ?? "N/A",
+                    createdAt: tx?.createdAt ?? null,
                     amount,
                     sender: userData.data,
                     senderPrevBalance: newBalance - amount,
@@ -136,7 +144,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
             }
 
             if (type === "withdraw") {
-                  if (!selectedUser) {
+                if (!selectedUser) {
                     toast.error("Please select a user from the search results.");
                     return;
                 }
@@ -145,6 +153,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                     toast.error("You cannot withdraw to your own account.");
                     return;
                 }
+
                 if (!formData.amount || formData.amount <= 0) {
                     toast.error("Please enter a valid amount.");
                     return;
@@ -210,7 +219,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                                     }}
                                 />
 
-                                {/* Show selected user/agent */}
+                                {/* ✅ Selected user */}
                                 {selectedUser && (
                                     <p className="text-sm text-green-600 mt-1">
                                         ✅ Selected: {selectedUser.name} ({selectedUser.email}){" "}
@@ -228,29 +237,47 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                                     </p>
                                 )}
 
-                                {/* Show results */}
-                                {searchTerm.length >= 2 && !selectedUser && !userSearchLoading && (searchData?.data?.length ?? 0) === 0 && (
-                                    <p className="text-sm text-red-500 mt-1">No matches found.</p>
-                                )}
-
-                                {searchTerm.length >= 2 && !selectedUser && (searchData?.data?.length ?? 0) > 0 && (
-                                    <ul className="bg-white border rounded shadow max-h-40 overflow-y-auto mt-1 z-10 relative">
-                                        {searchData?.data
-                                            ?.filter((user) => user._id !== currentUserId)
-                                            .map((user) => (
-                                                <li
-                                                    key={user._id}
-                                                    className="cursor-pointer px-3 py-2 hover:bg-gray-200"
-                                                    onClick={() => setSelectedUser(user)}
-                                                >
-                                                    {user.name} ({user.email})
-                                                </li>
-                                            ))}
+                                {/* ✅ Skeleton loading for user search */}
+                                {userSearchLoading && !selectedUser && (
+                                    <ul className="bg-white border rounded shadow max-h-40 overflow-y-auto mt-1 z-10 relative space-y-2 p-2">
+                                        {[...Array(3)].map((_, i) => (
+                                            <li key={i}>
+                                                <Skeleton className="h-4 w-3/4" />
+                                            </li>
+                                        ))}
                                     </ul>
                                 )}
+
+                                {/* No matches */}
+                                {searchTerm.length >= 2 &&
+                                    !selectedUser &&
+                                    !userSearchLoading &&
+                                    (searchData?.data?.length ?? 0) === 0 && (
+                                        <p className="text-sm text-red-500 mt-1">No matches found.</p>
+                                    )}
+
+                                {/* Result list */}
+                                {searchTerm.length >= 2 &&
+                                    !selectedUser &&
+                                    (searchData?.data?.length ?? 0) > 0 && (
+                                        <ul className="bg-white border rounded shadow max-h-40 overflow-y-auto mt-1 z-10 relative">
+                                            {searchData?.data
+                                                ?.filter((user) => user._id !== currentUserId)
+                                                .map((user) => (
+                                                    <li
+                                                        key={user._id}
+                                                        className="cursor-pointer px-3 py-2 hover:bg-gray-200"
+                                                        onClick={() => setSelectedUser(user)}
+                                                    >
+                                                        {user.name} ({user.email})
+                                                    </li>
+                                                ))}
+                                        </ul>
+                                    )}
                             </div>
                         )}
 
+                        {/* Amount Field */}
                         <div>
                             <Label>Amount</Label>
                             <Input
