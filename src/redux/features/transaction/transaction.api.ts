@@ -1,10 +1,13 @@
+// types
 import { baseApi } from "@/redux/baseApi";
 import type { IResponse } from "@/types";
 import type {
+  ICashInPayload,
+  ICashOutPayload,
   ISendMoneyPayload,
   IAmountPayload,
   ITransactionResponse,
-  IWithdrawPayload
+  IWithdrawPayload,
 } from "@/types/transaction.types";
 
 export const transactionApi = baseApi.injectEndpoints({
@@ -30,6 +33,22 @@ export const transactionApi = baseApi.injectEndpoints({
         data,
       }),
     }),
+
+    // ✅ NEW
+    cashIn: builder.mutation<IResponse<ITransactionResponse>, ICashInPayload>({
+      query: (data) => ({
+        url: "/transactions/cash-in",
+        method: "POST",
+        data,
+      }),
+    }),
+    cashOut: builder.mutation<IResponse<ITransactionResponse>, ICashOutPayload>({
+      query: (data) => ({
+        url: "/transactions/cash-out",
+        method: "POST",
+        data,
+      }),
+    }),
   }),
 });
 
@@ -37,4 +56,6 @@ export const {
   useSendMoneyMutation,
   useAddMoneyMutation,
   useWithdrawMoneyMutation,
+  useCashInMutation,
+  useCashOutMutation,
 } = transactionApi;

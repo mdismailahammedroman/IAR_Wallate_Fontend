@@ -7,26 +7,59 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton"; // ✅ Skeleton added
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useUserInfoQuery, useSearchUsersQuery } from "@/redux/features/auth/auth.api";
 import {
     useSendMoneyMutation,
     useAddMoneyMutation,
     useWithdrawMoneyMutation,
+    useCashInMutation,
+    useCashOutMutation,
 } from "@/redux/features/transaction/transaction.api";
 import { useLocation } from "react-router";
 
-type TransactionType = "send" | "add" | "withdraw";
+type TransactionType = "send" | "add" | "withdraw" | "cashin" | "cashout";
 
 interface IMoneyForm {
     amount: number;
-    receiverId?: string;
+    receiverId?: string;  // for selecting user/agent
 }
 
 interface Props {
     type: TransactionType;
 }
+
+// Validate only for cashin / cashout
+const validateTransaction = ({
+    type,
+    selectedUser,
+    currentUserId,
+    amount,
+}: {
+    type: TransactionType;
+    selectedUser: { _id: string; name?: string; email?: string } | null;
+    currentUserId: string | undefined;
+    amount: number | undefined;
+}): string | null => {
+    if (type === "cashin" || type === "cashout") {
+        if (!selectedUser || !selectedUser._id) {
+            return "Agent ID / User ID is required.";
+        }
+        if (!amount || amount <= 0) {
+            return "Valid amount is required.";
+        }
+        if (selectedUser._id === currentUserId) {
+            return "You cannot transact with your own account.";
+        }
+    } else {
+        // For other types, at least validate amount
+        if (!amount || amount <= 0) {
+            return "Valid amount is required.";
+        }
+    }
+    return null;
+};
 
 export const MoneyTransactionForm = ({ type }: Props) => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +69,8 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     const { data: userData, isLoading: authLoading } = useUserInfoQuery();
     const currentUserId = userData?.data?._id;
 
-    const shouldSkip = searchTerm.length < 2 || (type !== "send" && type !== "withdraw");
+    // Only search when needed
+    const shouldSkip = searchTerm.length < 2 || !["send", "withdraw", "cashin", "cashout"].includes(type);
 
     const { data: searchData, isLoading: userSearchLoading } = useSearchUsersQuery(
         { name: searchTerm, roles: ["user", "agent"] },
@@ -46,6 +80,9 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     const [sendMoney, { isLoading: sending }] = useSendMoneyMutation();
     const [addMoney, { isLoading: adding }] = useAddMoneyMutation();
     const [withdrawMoney, { isLoading: withdrawing }] = useWithdrawMoneyMutation();
+    const [cashIn, { isLoading: cashingIn }] = useCashInMutation();
+    const [cashOut, { isLoading: cashingOut }] = useCashOutMutation();
+
     const location = useLocation();
 
     const {
@@ -54,23 +91,23 @@ export const MoneyTransactionForm = ({ type }: Props) => {
         reset,
         setValue,
         formState: { errors },
-    } = useForm<IMoneyForm>();
+    } = useForm<IMoneyForm>({ mode: "onChange" });
 
     useEffect(() => {
-        if (selectedUser && (type === "send" || type === "withdraw")) {
+        if (selectedUser && ["send", "withdraw", "cashin", "cashout"].includes(type)) {
             setValue("receiverId", selectedUser._id);
             setSearchTerm(selectedUser.name);
         }
     }, [selectedUser, setValue, type]);
 
     useEffect(() => {
+        // Reset form when navigating or transaction completed
         setTransactionSummary(null);
         reset();
         setSelectedUser(null);
         setSearchTerm("");
     }, [location.pathname, reset]);
 
-    // ✅ Skeleton UI for loading auth state
     if (authLoading) {
         return (
             <Card className="w-full lg:max-w-xl mx-auto p-6 space-y-4">
@@ -81,105 +118,83 @@ export const MoneyTransactionForm = ({ type }: Props) => {
             </Card>
         );
     }
-
     if (!userData?.data) {
         return <div className="text-center mt-4 text-red-500">You must be logged in to use this feature.</div>;
     }
 
     const onSubmit = async (formData: IMoneyForm) => {
+        // Run our custom validation first
+        const validationError = validateTransaction({
+            type,
+            selectedUser,
+            currentUserId,
+            amount: formData.amount,
+        });
+        if (validationError) {
+            toast.error(validationError);
+            return;
+        }
+
         try {
             let response: any;
 
-            if (type === "send") {
+            if (type === "cashin") {
+                response = await cashIn({
+                    userId: selectedUser!._id,  // Assuming your backend expects agentId
+                    amount: formData.amount,
+                }).unwrap();
+            } else if (type === "cashout") {
+                response = await cashOut({
+                    userId: selectedUser!._id,
+                    amount: formData.amount,
+                }).unwrap();
+            } else if (type === "send") {
+                // your existing logic for send
                 if (!selectedUser) {
                     toast.error("Please select a user from the search results.");
                     return;
                 }
-
-                if (selectedUser._id === currentUserId) {
-                    toast.error("You cannot send money to your own account.");
-                    return;
-                }
-
                 response = await sendMoney({
                     receiverId: selectedUser._id,
                     amount: formData.amount,
                 }).unwrap();
-
-                const tx = response?.data?.transaction;
-                const amount = tx?.amount || formData.amount;
-
-                setTransactionSummary({
-                    type,
-                    transactionId: tx?.transactionId || "N/A",
-                    createdAt: tx?.createdAt || null,
-                    amount,
-                    sender: tx?.fromUser || userData.data,
-                    receiver: tx?.toUser || tx?.toAgent || selectedUser,
-                    senderPrevBalance: response.data.newSenderBalance - amount,
-                    senderNewBalance: response.data.newSenderBalance,
-                    receiverPrevBalance: response.data.newReceiverBalance - amount,
-                    receiverNewBalance: response.data.newReceiverBalance,
-                });
-            }
-
-            if (type === "add") {
+            } else if (type === "add") {
                 response = await addMoney({ amount: formData.amount }).unwrap();
-
-                const tx = response?.transaction || {};
-                const amount = tx?.amount ?? formData.amount;
-                const newBalance = response?.balance ?? null;
-
-                setTransactionSummary({
-                    type,
-                    transactionId: tx?.transactionId ?? "N/A",
-                    createdAt: tx?.createdAt ?? null,
-                    amount,
-                    sender: userData.data,
-                    senderPrevBalance: newBalance - amount,
-                    senderNewBalance: newBalance,
-                });
-
-                return;
-            }
-
-            if (type === "withdraw") {
+            } else if (type === "withdraw") {
                 if (!selectedUser) {
                     toast.error("Please select a user from the search results.");
                     return;
                 }
-
-                if (selectedUser._id === currentUserId) {
-                    toast.error("You cannot withdraw to your own account.");
-                    return;
-                }
-
-                if (!formData.amount || formData.amount <= 0) {
-                    toast.error("Please enter a valid amount.");
-                    return;
-                }
-
                 response = await withdrawMoney({
-                    amount: formData.amount,
                     agentId: selectedUser._id,
+                    amount: formData.amount,
                 }).unwrap();
-
-                const tx = response?.data?.transaction;
-                const amount = tx?.amount || formData.amount;
-
-                setTransactionSummary({
-                    type,
-                    transactionId: tx?.transactionId || "N/A",
-                    createdAt: tx?.createdAt || null,
-                    amount,
-                    sender: tx?.fromUser || userData.data,
-                    receiver: tx?.toAgent || selectedUser,
-                    senderPrevBalance: response.data.userBalance - amount,
-                    senderNewBalance: response.data.userBalance,
-                    receiverPrevBalance: response.data.agentBalance - amount,
-                    receiverNewBalance: response.data.agentBalance,
-                });
             }
+
+            // Extract transaction & balances from response
+            // Adjust this to match your backend response structure
+            const tx = response?.data?.transaction || response?.transaction || {};
+            const amount = tx?.amount || formData.amount;
+
+            setTransactionSummary({
+                type,
+                transactionId: tx?.transactionId || "N/A",
+                createdAt: tx?.createdAt || null,
+                amount,
+                sender: tx?.fromUser || userData.data,
+                receiver: tx?.toUser || tx?.toAgent || selectedUser,
+                senderPrevBalance:
+                    response?.data?.newSenderBalance
+                        ? response.data.newSenderBalance - amount
+                        : null,
+                senderNewBalance:
+                    response?.data?.newSenderBalance || response?.balance,
+                receiverPrevBalance:
+                    response?.data?.newReceiverBalance
+                        ? response.data.newReceiverBalance - amount
+                        : null,
+                receiverNewBalance: response?.data?.newReceiverBalance,
+            });
 
             toast.success(response.message || "Transaction successful!");
             reset();
@@ -191,12 +206,13 @@ export const MoneyTransactionForm = ({ type }: Props) => {
         }
     };
 
-    const loading = sending || adding || withdrawing;
-
+    const loading = sending || adding || withdrawing || cashingIn || cashingOut;
     const renderTitle = {
         send: "Send Money",
         add: "Add Money",
         withdraw: "Withdraw Money",
+        cashin: "Cash In",
+        cashout: "Cash Out",
     }[type];
 
     return (
@@ -207,7 +223,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
             <CardContent>
                 {!transactionSummary ? (
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        {(type === "send" || type === "withdraw") && (
+                        {(type === "send" || type === "withdraw" || type === "cashin"  || type === "cashout") && (
                             <div>
                                 <Label>{type === "send" ? "Search User" : "Search Agent (by name or email)"}</Label>
                                 <Input

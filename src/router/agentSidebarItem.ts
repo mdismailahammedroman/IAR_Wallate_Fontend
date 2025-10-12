@@ -1,9 +1,10 @@
-
+// src/routes/agentSidebarItems.ts
+import TransactionPage from "@/pages/transaction/TransactionPage";
 import { UserProfile } from "@/pages/user/UserProfile";
 import { UserUpdateForm } from "@/pages/user/UserUpdateForm";
+import { MyTransactionHistory } from "@/pages/wallet/MyTransactionHistory";
+import { MyWalletInfo } from "@/pages/wallet/MyWalletInfo";
 import type { ISidebarItem } from "@/types";
-
-
 
 export const agentSidebarItems: ISidebarItem[] = [
   {
@@ -12,25 +13,45 @@ export const agentSidebarItems: ISidebarItem[] = [
       {
         title: "Profile",
         url: "/user/me",
-        component:UserProfile,
+        component: UserProfile,
       },
       {
         title: "Update Profile",
         url: "/user/update",
-        component:UserUpdateForm,
+        component: UserUpdateForm,
       },
     ],
-    
   },
-    {
-    title: "transaction",
+  {
+    title: "Transactions",
     items: [
       {
-        title: "cash in",
-        url: "/user/send-money",
-        component:UserProfile,
+        title: "Cash In",
+        url: "/user/transactions/cash-in",
+        component: TransactionPage,
+      },
+      {
+        title: "Cash Out",
+        url: "/user/transactions/cash-out",
+        component: TransactionPage,
       },
     ],
-    
   },
+   {
+      title: "wallet Info",
+      items: [
+        {
+          title: "My Wallet",
+          url: "/user/wallets/me",
+          component: MyWalletInfo
+  
+        },
+        {
+          title: "My Transaction History",
+          url: "/user/transactions/me",
+          component: MyTransactionHistory
+  
+        },
+      ],
+    },
 ];
