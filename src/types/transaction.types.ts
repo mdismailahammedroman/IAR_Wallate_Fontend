@@ -61,3 +61,14 @@ export interface ITransactionListResponse {
   total: number;
   limit: number;
 }
+
+
+export interface ICashInPayload {
+  amount: number;
+   userId: string;
+}
+
+export interface ICashOutPayload {
+  amount: number;
+   userId: string;
+}

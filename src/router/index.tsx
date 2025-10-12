@@ -8,6 +8,7 @@ import { adminSidebarItems } from "./AdminSidebarItem";
 import { generateRoutes } from "@/utils/generateRoutes";
 import { userSidebarItems } from "./userSidebarItems";
 import { role } from "@/constants/roles";
+import { agentSidebarItems } from "./agentSidebarItem";
 
 // Lazy-loaded components
 const App = lazy(() => import("@/App"));
@@ -51,7 +52,7 @@ const router = createBrowserRouter([
   path: "/user",
   children: [
     { index: true, element: <Navigate to="/user/me" /> },
-    ...generateRoutes(userSidebarItems),
+   ...generateRoutes([...userSidebarItems, ...agentSidebarItems]),
   ],
 },
 
