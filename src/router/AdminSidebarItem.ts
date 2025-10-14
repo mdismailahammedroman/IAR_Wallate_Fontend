@@ -1,5 +1,8 @@
 
 import Analytics from "@/pages/admin/Analytics";
+import AgentManagement from "@/pages/user/AgentManagement";
+import ManageUsersAndAgents from "@/pages/user/ManageUsersAndAgents";
+import UserManagement from "@/pages/user/UserManagement";
 import { UserProfile } from "@/pages/user/UserProfile";
 import type { ISidebarItem } from "@/types";
 
@@ -15,14 +18,19 @@ export const adminSidebarItems: ISidebarItem[] = [
         component: Analytics,
       },
       {
-        title: "User Manage",
-        url: "analytics",
-        component: Analytics,
+        title: "Manage User",
+        url: "manageuser",
+        component: UserManagement,
       },
       {
-        title: "Agent Manage",
-        url: "analytics",
-        component: Analytics,
+        title: "Manage Agent",
+        url: "manageagent",
+        component: AgentManagement,
+      },
+      {
+        title: "Manage Agent and user",
+        url: "manageagent",
+        component: ManageUsersAndAgents,
       },
     ],
   },

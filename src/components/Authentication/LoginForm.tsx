@@ -40,6 +40,13 @@ const LoginForm = () => {
   // ✅ Login mutation
   const [login] = useLoginMutation();
 
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken"); // instead of "token"
+    if (token) {
+      navigate("/"); // or wherever
+    }
+  }, [navigate]);
+
   // ✅ Handle form submission
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
@@ -56,11 +63,13 @@ const LoginForm = () => {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("user", JSON.stringify(user));
 
-      // ✅ Navigate based on role
       if (user.role === "AGENT") {
         navigate("/user/me");
+      } else if (user.role === "ADMIN") {
+        navigate("/admin/analytics");
       } else {
         navigate("/user/me");
+
       }
     } catch (err: any) {
       const message = err?.data?.message;
@@ -76,13 +85,7 @@ const LoginForm = () => {
     }
   };
 
-  // ✅ Redirect if already logged in
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/"); // Redirect to home or dashboard
-    }
-  }, [navigate]);
+
 
   // ✅ Lottie animation config
   const defaultOptions = {
