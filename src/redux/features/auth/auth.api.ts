@@ -81,10 +81,45 @@ export const authApi = baseApi.injectEndpoints({
     params: { name, roles: roles.join(",") },
   }),
 }),
+fetchUsers: builder.query({
+      query: () => ({
+        url: "/admin/users",
+        method: "GET",
+      }),
+      providesTags: ["USER"],
+    }),
+    blockUnblockUser: builder.mutation({
+      query: ({ id, action }: { id: string; action: "block" | "unblock" }) => ({
+        url: `/admin/users/${id}/block-unblock`,
+        method: "PATCH",
+        data: { action },
+      }),
+      invalidatesTags: ["USER"],
+    }),
 
+    fetchAgents: builder.query({
+      query: () => ({
+        url: "/admin/agents",
+        method: "GET",
+      }),
+      providesTags: ["AGENT"],
+    }),
+    approveAgent: builder.mutation({
+      query: (id: string) => ({
+        url: `/admin/agents/${id}/approve`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["AGENT"],
+    }),
+    suspendAgent: builder.mutation({
+      query: (id: string) => ({
+        url: `/admin/agents/${id}/suspend`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["AGENT"],
+    }),
   }),
 });
-
 export const {
   useUserRegisterMutation,
   useLoginMutation,
@@ -94,4 +129,9 @@ export const {
   useUserInfoQuery,
   useUpdateUserMutation,
   useSearchUsersQuery,
+    useFetchUsersQuery,
+  useBlockUnblockUserMutation,
+  useFetchAgentsQuery,
+  useApproveAgentMutation,
+  useSuspendAgentMutation,
 } = authApi;

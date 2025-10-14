@@ -14,6 +14,16 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "analytics",
         component: Analytics,
       },
+      {
+        title: "User Manage",
+        url: "analytics",
+        component: Analytics,
+      },
+      {
+        title: "Agent Manage",
+        url: "analytics",
+        component: Analytics,
+      },
     ],
   },
   {

@@ -1,15 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { motion } from "framer-motion";
-import animationData from "../../assets/lottie/loading1.json";
-import { useForm, type SubmitHandler,  } from "react-hook-form";
-import { useLoginMutation } from "@/redux/features/auth/auth.api";
-import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Link, useNavigate } from "react-router";
-import Lottie from "react-lottie";
+"use client";
 
+import { useEffect } from "react";
+import { motion } from "framer-motion";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Lottie from "react-lottie";
+import { toast } from "sonner";
+import { useNavigate, Link } from "react-router";
+
+import animationData from "../../assets/lottie/loading1.json";
+import { useLoginMutation } from "@/redux/features/auth/auth.api";
+
+// ✅ Schema with zod
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
@@ -17,9 +21,15 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
- const LoginForm = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+const LoginForm = () => {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
+
+  // ✅ React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "superadmin@gmail.com",
@@ -27,44 +37,54 @@ type LoginFormData = z.infer<typeof loginSchema>;
     },
   });
 
+  // ✅ Login mutation
   const [login] = useLoginMutation();
 
-const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
-  try {
-    const response = await login(data).unwrap(); 
+  // ✅ Handle form submission
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+    try {
+      const response = await login(data).unwrap();
+      const { accessToken, user } = response.data;
 
-    const { user } = response.data;
+      if (!user?.role || !accessToken) {
+        console.error("Missing user role or token");
+        toast.error("Something went wrong. Try again.");
+        return;
+      }
 
+      // ✅ Save token & user to localStorage
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
 
-    if (!user?.role) {
-      console.error("Missing role in login response");
-      return;
+      // ✅ Navigate based on role
+      if (user.role === "AGENT") {
+        navigate("/user/me");
+      } else {
+        navigate("/user/me");
+      }
+    } catch (err: any) {
+      const message = err?.data?.message;
+
+      if (message === "Password does not match") {
+        toast.error("Invalid credentials");
+      } else if (message === "User is not verified") {
+        toast.error("Your account is not verified");
+        navigate("/verify", { state: data.email });
+      } else {
+        toast.error("Something went wrong");
+      }
     }
+  };
 
-  
-// Then navigate somewhere appropriate
-if (user.role === "AGENT") {
-  navigate("/agent/profileinfo");
-} else {
-  navigate("/user/me");
-}
-      navigate("/");
-  } catch (err: any) {
-    console.error("Login error:", err);
-
-    const message = err?.data?.message;
-    if (message === "Password does not match") {
-      toast.error("Invalid credentials");
-    } else if (message === "User is not verified") {
-      toast.error("Your account is not verified");
-      navigate("/verify", { state: data.email });  // Pass email to /verify
-    } else {
-      toast.error("Something went wrong");
+  // ✅ Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/"); // Redirect to home or dashboard
     }
-  }
-};
+  }, [navigate]);
 
-
+  // ✅ Lottie animation config
   const defaultOptions = {
     loop: true,
     autoplay: true,
@@ -73,7 +93,6 @@ if (user.role === "AGENT") {
       preserveAspectRatio: "xMidYMid slice",
     },
   };
-
 
   return (
     <motion.div
@@ -138,8 +157,7 @@ if (user.role === "AGENT") {
 
           <p className="text-center text-sm mt-4 text-gray-800">
             Don't have an account?{" "}
-            <Link to="/user/register" className="text-indigo-600 cursor-pointer">
-                     
+            <Link to="/user/register" className="text-indigo-600">
               Sign Up
             </Link>
           </p>
@@ -148,4 +166,5 @@ if (user.role === "AGENT") {
     </motion.div>
   );
 };
-export default LoginForm
+
+export default LoginForm;

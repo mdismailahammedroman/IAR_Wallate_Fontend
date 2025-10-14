@@ -1,59 +1,101 @@
-import { Skeleton } from "@/components/ui/skeleton";
+// import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useMyWalletQuery } from "@/redux/features/wallet/wallet.api";
+import { useMyTransactionsQuery, useMyWalletQuery } from "@/redux/features/wallet/wallet.api";
+import { useNavigate } from "react-router";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export function MyWalletInfo() {
-  const { data, isLoading, error, refetch } = useMyWalletQuery();
+   const navigate = useNavigate();
 
-  if (isLoading) {
-    return (
-      <Card className="w-full lg:max-w-md mx-auto p-6 space-y-4 animate-pulse">
-        <Skeleton className="h-6 w-1/2 rounded-md" />
-        <Skeleton className="h-10 w-full rounded-md" />
-        <Skeleton className="h-4 w-1/3 rounded-md" />
-      </Card>
-    );
-  }
+  // Fetch wallet & balance
+  const { data: walletResp, isLoading: loadingWallet } = useMyWalletQuery();
+  const walletData = walletResp?.data;
 
-  if (error || !data?.data) {
-    return (
-      <div className="text-red-500 text-center mt-6 text-sm">
-        ❌ Could not load wallet info. Please try again.
-      </div>
-    );
-  }
+  // Fetch recent transactions (e.g. limit = 5, page = 1)
+  const { data: txnResp, isLoading: loadingTxns } = useMyTransactionsQuery({
+    limit: 5,
+    page: 1,
+  });
+  const transactions = txnResp?.data?.transactions || [];
 
-  const { balance, status, updatedAt, user } = data.data;
+  // Format balance (fallback to 0)
+  const balance = walletData?.balance ?? 0;
 
   return (
-    <Card className="w-full lg:max-w-md mx-auto shadow-md">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold text-fuchsia-900">
-          💼 My Wallet
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm text-muted-foreground">
-        <div>
-          <p><span className="font-medium text-gray-800">👤 User:</span> {user.name} ({user.email})</p>
-        </div>
-        <div>
-          <p><span className="font-medium text-gray-800">💰 Balance:</span> <span className="text-green-600 font-semibold">${balance}</span></p>
-        </div>
-        <div>
-          <p><span className="font-medium text-gray-800">📍 Status:</span> {status}</p>
-        </div>
-        <div>
-          <p><span className="font-medium text-gray-800">🕒 Last Updated:</span> {new Date(updatedAt).toLocaleString()}</p>
-        </div>
-        <Button
-          variant="default"
-          onClick={() => refetch()}
-          className="mt-2 bg-fuchsia-900 hover:bg-fuchsia-800"
-        >
-        Refresh
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-8">
+      {/* Wallet Balance & Quick Actions */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Wallet Balance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingWallet ? (
+              <p>Loading...</p>
+            ) : (
+              <p className="text-3xl font-bold text-green-600">
+                {balance.toLocaleString()}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex gap-4 flex-wrap">
+            <Button onClick={() => navigate("/user/transactions/cash-in")} className="w-[140px]">
+              Cash In
+            </Button>
+            <Button onClick={() => navigate("/user/transactions/cash-out")} className="w-[140px]">
+              Cash Out
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Transactions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingTxns ? (
+            <p>Loading transactions...</p>
+          ) : transactions.length === 0 ? (
+            <p>No recent transactions.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>From</TableHead>
+                    <TableHead>To</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((txn) => (
+                    <TableRow key={txn._id}>
+                      <TableCell>{txn.transactionType}</TableCell>
+                      <TableCell>{txn.amount}</TableCell>
+                      <TableCell>{txn.fromUser?.name || "-"}</TableCell>
+                      <TableCell>{txn.toUser?.name || "-"}</TableCell>
+                      <TableCell>
+                        {new Date(txn.createdAt).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
-}
+};
