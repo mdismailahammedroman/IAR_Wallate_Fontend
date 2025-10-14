@@ -81,10 +81,46 @@ export const authApi = baseApi.injectEndpoints({
     params: { name, roles: roles.join(",") },
   }),
 }),
+fetchUsers: builder.query<IResponse<ISearchedUser[]>, void>({
+      query: () => ({
+        url: "/user/users",
+        method: "GET",
+      }),
+      providesTags: ["USER"],
+    }),
+     fetchAgents: builder.query<IResponse<ISearchedUser[]>, void>({
+      query: () => ({
+        url: "/user/agents",
+        method: "GET",
+      }),
+      providesTags: ["AGENT"],
+    }),
+      blockUnblockUser: builder.mutation({
+  query: ({ id, action }: { id: string; action: "block" | "unblock" }) => ({
+    url: `/user/block-unblock/${id}`,  // Remove /user/users/ prefix, use exact route
+    method: "PATCH",
+    data: { action },
+  }),
+  invalidatesTags: ["USER"],
+}),
 
+approveAgent: builder.mutation({
+  query: (id: string) => ({
+    url: `/user/approve-agent/${id}`,  // Adjusted URL
+    method: "PATCH",
+  }),
+  invalidatesTags: ["AGENT"],
+}),
+
+suspendAgent: builder.mutation({
+  query: (id: string) => ({
+    url: `/user/suspend-agent/${id}`,  // Adjusted URL
+    method: "PATCH",
+  }),
+  invalidatesTags: ["AGENT"],
+}),
   }),
 });
-
 export const {
   useUserRegisterMutation,
   useLoginMutation,
@@ -94,4 +130,9 @@ export const {
   useUserInfoQuery,
   useUpdateUserMutation,
   useSearchUsersQuery,
+    useFetchUsersQuery,
+  useBlockUnblockUserMutation,
+  useFetchAgentsQuery,
+  useApproveAgentMutation,
+  useSuspendAgentMutation,
 } = authApi;

@@ -1,125 +1,140 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import { useMyTransactionsQuery } from "@/redux/features/wallet/wallet.api";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-interface TransactionRowProps {
-  tx: any;
-}
-
-function TransactionRow({ tx }: TransactionRowProps) {
-  return (
-    <tr className="border-b text-sm text-gray-700 hover:bg-gray-50 transition">
-      <td className="py-2 px-3">{new Date(tx.createdAt).toLocaleString()}</td>
-      <td className="py-2 px-3 capitalize">{tx.transactionType}</td>
-      <td className="py-2 px-3 text-green-600 font-semibold">tk{tx.amount}</td>
-      <td className="py-2 px-3">
-        {tx.toAgent
-          ? `Agent: ${tx.toAgent.name || tx.toAgent}`
-          : tx.toUser
-          ? `User: ${tx.toUser.name || tx.toUser}`
-          : "-"}
-      </td>
-      <td className="py-2 px-3">
-        <span
-          className={`px-2 py-1 text-xs rounded-full ${
-            tx.status === "COMPLETED"
-              ? "bg-green-100 text-green-700"
-              : tx.status === "PENDING"
-              ? "bg-yellow-100 text-yellow-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {tx.status}
-        </span>
-      </td>
-    </tr>
-  );
-}
-
-export function MyTransactionHistory() {
+export const MyTransactionHistory = () => {
+  const [limit] = useState(10);
   const [page, setPage] = useState(1);
-  const { data, isLoading, error, isFetching } = useMyTransactionsQuery({ limit: 10, page });
+  const [type, setType] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const skeletonRows = Array.from({ length: 5 });
+  const { data, isLoading, refetch } = useMyTransactionsQuery({
+    limit,
+    page,
+    type,
+    startDate,
+    endDate,
+  });
 
-  if (isLoading) {
-    return (
-      <Card className="w-full lg:max-w-4xl mx-auto p-6 space-y-4">
-        <Skeleton className="h-6 w-1/3" />
-        {skeletonRows.map((_, idx) => (
-          <Skeleton key={idx} className="h-4 w-full" />
-        ))}
-      </Card>
-    );
-  }
+  const transactions = data?.data?.transactions || [];
 
-  if (error || !data?.data?.transactions) {
-    return (
-      <div className="text-center text-red-500 mt-6">
-        Unable to load transactions. Please try again.
-      </div>
-    );
-  }
-
-  // ✅ Corrected destructuring
-  const { transactions, total, limit } = data.data;
-  const totalPages = Math.ceil(total / limit);
+  const handleFilter = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    refetch();
+  };
 
   return (
-    <Card className="w-full lg:max-w-4xl mx-auto">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-xl text-fuchsia-900">📄 Transaction History</CardTitle>
+        <CardTitle className="text-2xl">My Transactions</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border rounded-lg">
-            <thead className="bg-gray-100 text-gray-700 text-sm">
-              <tr>
-                <th className="text-left px-3 py-2">Date</th>
-                <th className="text-left px-3 py-2">Type</th>
-                <th className="text-left px-3 py-2">Amount</th>
-                <th className="text-left px-3 py-2">Counterparty</th>
-                <th className="text-left px-3 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-500">
-                    No transactions found.
-                  </td>
-                </tr>
-              ) : (
-                transactions.map((tx: any) => <TransactionRow key={tx._id} tx={tx} />)
-              )}
-            </tbody>
-          </table>
-        </div>
 
-        {/* Pagination Controls */}
-        <div className="mt-6 flex justify-between items-center">
-          <Button
-            variant="outline"
-            disabled={page <= 1 || isFetching}
-            onClick={() => setPage((p) => p - 1)}
+      <CardContent>
+        {/* ✅ Responsive Filter Form */}
+        <form
+          onSubmit={handleFilter}
+          className="flex flex-col md:flex-row md:flex-wrap gap-4 items-start md:items-center mb-6"
+        >
+          <Select
+            onValueChange={(val) => setType(val === "ALL" ? "" : val)}
+            value={type || "ALL"}
           >
-            ⬅ Prev
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Transaction Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Types</SelectItem>
+              <SelectItem value="SEND">Send</SelectItem>
+              <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+              <SelectItem value="CASH_IN">Cash In</SelectItem>
+              <SelectItem value="CASH_OUT">Cash Out</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full md:w-[180px]"
+          />
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full md:w-[180px]"
+          />
+
+          <Button type="submit" className="w-full md:w-auto">
+            Filter
           </Button>
-          <span className="text-sm text-gray-600">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            disabled={page >= totalPages || isFetching}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next ➡
-          </Button>
+        </form>
+
+        {/* ✅ Responsive Table (with horizontal scroll on small screens) */}
+        <div className="overflow-x-auto">
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>From</TableHead>
+                  <TableHead>To</TableHead>
+                  <TableHead>Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length > 0 ? (
+                  transactions.map((txn) => (
+                    <TableRow key={txn._id}>
+                      <TableCell>{txn.transactionType}</TableCell>
+                      <TableCell>{txn.amount}</TableCell>
+                      <TableCell>{txn.fromUser?.name || "-"}</TableCell>
+                      <TableCell>{txn.toUser?.name || "-"}</TableCell>
+                      <TableCell>
+                        {new Date(txn.createdAt).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      No transactions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </CardContent>
     </Card>
   );
-}
+};

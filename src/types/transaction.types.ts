@@ -8,6 +8,7 @@ export interface ISendMoneyPayload {
 
 export interface IAmountPayload {
   amount: number;
+   agentId: string;
   agentIdentifier?: string; // Optional for addMoney
 }
 

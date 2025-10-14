@@ -70,7 +70,8 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     const currentUserId = userData?.data?._id;
 
     // Only search when needed
-    const shouldSkip = searchTerm.length < 2 || !["send", "withdraw", "cashin", "cashout"].includes(type);
+    const shouldSkip = searchTerm.length < 2 || !["send", "add", "withdraw", "cashin", "cashout"].includes(type);
+
 
     const { data: searchData, isLoading: userSearchLoading } = useSearchUsersQuery(
         { name: searchTerm, roles: ["user", "agent"] },
@@ -94,7 +95,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     } = useForm<IMoneyForm>({ mode: "onChange" });
 
     useEffect(() => {
-        if (selectedUser && ["send", "withdraw", "cashin", "cashout"].includes(type)) {
+        if (selectedUser && ["send", "addmony", "withdraw", "cashin", "cashout"].includes(type)) {
             setValue("receiverId", selectedUser._id);
             setSearchTerm(selectedUser.name);
         }
@@ -158,9 +159,19 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                     receiverId: selectedUser._id,
                     amount: formData.amount,
                 }).unwrap();
-            } else if (type === "add") {
-                response = await addMoney({ amount: formData.amount }).unwrap();
-            } else if (type === "withdraw") {
+            }
+            else if (type === "add") {
+                if (!selectedUser) {
+                    toast.error("Please select an agent from the search results.");
+                    return;
+                }
+
+                response = await addMoney({
+                    amount: formData.amount,
+                    agentId: selectedUser._id,
+                }).unwrap();
+            }
+            else if (type === "withdraw") {
                 if (!selectedUser) {
                     toast.error("Please select a user from the search results.");
                     return;
@@ -223,9 +234,9 @@ export const MoneyTransactionForm = ({ type }: Props) => {
             <CardContent>
                 {!transactionSummary ? (
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        {(type === "send" || type === "withdraw" || type === "cashin"  || type === "cashout") && (
+                        {(type === "send" ||  type === "add" || type === "withdraw" || type === "cashin" || type === "cashout") && (
                             <div>
-                                <Label>{type === "send" ? "Search User" : "Search Agent (by name or email)"}</Label>
+                                <Label className="m-1">{type === "send" ? "Search User" : "Search Agent (by name or email)"}</Label>
                                 <Input
                                     placeholder="Search by name or email..."
                                     value={searchTerm}
@@ -282,7 +293,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                                                 .map((user) => (
                                                     <li
                                                         key={user._id}
-                                                        className="cursor-pointer px-3 py-2 hover:bg-gray-200"
+                                                        className="cursor-pointer px-3 py-2 hover:bg-gray-200 dark:bg-gray-700"
                                                         onClick={() => setSelectedUser(user)}
                                                     >
                                                         {user.name} ({user.email})
@@ -295,7 +306,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
 
                         {/* Amount Field */}
                         <div>
-                            <Label>Amount</Label>
+                            <Label className="m-1">Amount</Label>
                             <Input
                                 type="number"
                                 placeholder="Enter amount"

@@ -2,28 +2,45 @@
 
 import { baseApi } from "@/redux/baseApi";
 import type { IResponse } from "@/types";
-import type { ITransactionListResponse, IWallet } from "@/types/transaction.types";
-
-
+import type {
+  ITransactionListResponse,
+  IWallet,
+} from "@/types/transaction.types";
 
 export const walletApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     myWallet: builder.query<IResponse<IWallet>, void>({
       query: () => ({
-        url: "/wallets/me", 
+        url: "/wallets/me",
         method: "GET",
       }),
     }),
-    myTransactions: builder.query<IResponse<ITransactionListResponse>, { limit: number; page: number }>({
-      query: ({ limit, page }) => ({
-        url: `/wallets/transactions/me?limit=${limit}&page=${page}`,
-        method: "GET",
-      }),
+    myTransactions: builder.query<
+      IResponse<ITransactionListResponse>,
+      {
+        limit: number;
+        page: number;
+        type?: string;
+        startDate?: string;
+        endDate?: string;
+      }
+    >({
+      query: ({ limit, page, type, startDate, endDate }) => {
+        const params = new URLSearchParams();
+
+        params.append("limit", limit.toString());
+        params.append("page", page.toString());
+        if (type) params.append("type", type);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
+
+        return {
+          url: `/wallets/transactions/me?${params.toString()}`,
+          method: "GET",
+        };
+      },
     }),
   }),
 });
 
-export const {
-  useMyWalletQuery,
-  useMyTransactionsQuery
-} = walletApi;
+export const { useMyWalletQuery, useMyTransactionsQuery } = walletApi;

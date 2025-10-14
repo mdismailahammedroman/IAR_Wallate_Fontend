@@ -89,6 +89,9 @@ export interface IResponse<T> {
 }
 
 export interface ISearchedUser {
+  isSuspended: any;
+  isBlocked: any;
+  isApproved: any;
   _id: string;
   name: string;
   email: string;
@@ -115,3 +118,11 @@ export interface ApiError {
 
 
 
+export const Role = {
+  SUPER_ADMIN: "SUPER_ADMIN",
+  ADMIN: "ADMIN",
+  USER: "USER",
+  AGENT: "AGENT",
+} as const;
+
+export type Role = (typeof Role)[keyof typeof Role];
