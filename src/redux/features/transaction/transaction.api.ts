@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // types
 import { baseApi } from "@/redux/baseApi";
 import type { IResponse } from "@/types";
@@ -8,6 +9,8 @@ import type {
   IAmountPayload,
   ITransactionResponse,
   IWithdrawPayload,
+  ITransaction,
+  IPaginatedResponse,
 } from "@/types/transaction.types";
 
 export const transactionApi = baseApi.injectEndpoints({
@@ -49,6 +52,15 @@ export const transactionApi = baseApi.injectEndpoints({
         data,
       }),
     }),
+    // in transactionApi
+getAllTransactions: builder.query<IPaginatedResponse<ITransaction[]>, any>({
+  query: (params) => ({
+    url: "/transactions/all-transactions",
+    method: "GET",
+    params,
+  }),
+}),
+
   }),
 });
 
@@ -58,4 +70,6 @@ export const {
   useWithdrawMoneyMutation,
   useCashInMutation,
   useCashOutMutation,
+  useGetAllTransactionsQuery,
+
 } = transactionApi;

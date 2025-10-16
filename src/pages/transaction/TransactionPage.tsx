@@ -1,17 +1,19 @@
 import { useLocation } from "react-router";
 import { MoneyTransactionForm } from "./MoneyTransactionForm";
 
+type TransactionType = "send" | "add" | "withdraw" | "cashin" | "cashout";
+
+const getTransactionTypeFromPath = (pathname: string): TransactionType => {
+  if (pathname.includes("add-money")) return "add";
+  if (pathname.includes("withdraw-money")) return "withdraw";
+  if (pathname.includes("cash-in")) return "cashin";
+  if (pathname.includes("cash-out")) return "cashout";
+  return "send"; // default
+};
+
 const TransactionPage = () => {
   const location = useLocation();
-
-  let type: "send" | "add" | "withdraw"| "cashin" | "cashout"  = "send";
-
-
-
-  if (location.pathname.includes("add-money")) type = "add";
-  else if (location.pathname.includes("withdraw-money")) type = "withdraw";
-  else if (location.pathname.includes("cash-in")) type = "cashin";
-  else if (location.pathname.includes("cash-out")) type = "cashout";
+  const type = getTransactionTypeFromPath(location.pathname);
 
   return <MoneyTransactionForm type={type} />;
 };

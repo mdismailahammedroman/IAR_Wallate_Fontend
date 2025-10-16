@@ -89,6 +89,8 @@ export interface IResponse<T> {
 }
 
 export interface ISearchedUser {
+  userStatus: string;
+  isActive: string;
   isSuspended: any;
   isBlocked: any;
   isApproved: any;

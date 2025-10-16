@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -37,57 +36,33 @@ const LoginForm = () => {
     },
   });
 
-  // ✅ Login mutation
-  const [login] = useLoginMutation();
+   const [login] = useLoginMutation();
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken"); // instead of "token"
-    if (token) {
-      navigate("/"); // or wherever
+const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+  try {
+    const res = await login(data).unwrap();
+    if (res.success) {
+      toast.success("Logged in successfully");
+      navigate("/");
     }
-  }, [navigate]);
+  } catch (err: any) {
+    console.error("Login error:", err);
 
-  // ✅ Handle form submission
-  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
-    try {
-      const response = await login(data).unwrap();
-      const { accessToken, user } = response.data;
-
-      if (!user?.role || !accessToken) {
-        console.error("Missing user role or token");
-        toast.error("Something went wrong. Try again.");
-        return;
-      }
-
-      // ✅ Save token & user to localStorage
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      if (user.role === "AGENT") {
-        navigate("/user/me");
-      } else if (user.role === "ADMIN") {
-        navigate("/admin/analytics");
-      } else {
-        navigate("/user/me");
-
-      }
-    } catch (err: any) {
-      const message = err?.data?.message;
-
-      if (message === "Password does not match") {
-        toast.error("Invalid credentials");
-      } else if (message === "User is not verified") {
-        toast.error("Your account is not verified");
-        navigate("/verify", { state: data.email });
-      } else {
-        toast.error("Something went wrong");
-      }
+    const message = err?.data?.message;
+    if (message === "Password does not match") {
+      toast.error("Invalid credentials");
+    } else if (message === "User is not verified") {
+      toast.error("Your account is not verified");
+      console.log("Navigating to /verify with email:", data.email);
+      navigate("/verify", { state: data.email });  // Pass email to /verify
+    } else {
+      toast.error("Something went wrong");
     }
-  };
+  }
+};
 
 
-
-  // ✅ Lottie animation config
+  //  Lottie animation config
   const defaultOptions = {
     loop: true,
     autoplay: true,

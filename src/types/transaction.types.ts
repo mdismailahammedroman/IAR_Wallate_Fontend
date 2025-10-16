@@ -30,7 +30,7 @@ export interface IWallet {
 // --- Transaction Interface ---
 export interface ITransaction {
   _id: string;
-  transactionType: "SEND" | "WITHDRAW" | "DEPOSIT"; // Add union if known
+  transactionType: "SEND" | "WITHDRAW" | "ADD"|"CASH_IN"| "CASH_OUT"; // Add union if known
   fromUser?: IUser;
   toUser?: IUser;
   toAgent?: IUser;
@@ -72,4 +72,40 @@ export interface ICashInPayload {
 export interface ICashOutPayload {
   amount: number;
    userId: string;
+}
+
+export interface ITransaction {
+  _id: string;
+  type: "SEND" | "WITHDRAW" | "ADD" | "CASH_IN" | "CASH_OUT";
+  amount: number;
+  from: string;
+  to: string;
+  createdAt: string;
+  status: "PENDING" | "COMPLETED" | "FAILED";
+
+  initiatedByUser?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+
+  initiatedByAgent?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+
+  fromUser?: IUser;
+  toUser?: IUser;
+  fromAgent?: IUser;
+  toAgent?: IUser;
+}
+
+export interface IPaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  success: boolean;
+  message?: string;
 }

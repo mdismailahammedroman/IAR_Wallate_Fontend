@@ -1,7 +1,7 @@
 
 import Analytics from "@/pages/admin/Analytics";
+import TransactionList from "@/pages/transaction/TransactionList";
 import AgentManagement from "@/pages/user/AgentManagement";
-import ManageUsersAndAgents from "@/pages/user/ManageUsersAndAgents";
 import UserManagement from "@/pages/user/UserManagement";
 import { UserProfile } from "@/pages/user/UserProfile";
 import type { ISidebarItem } from "@/types";
@@ -28,9 +28,9 @@ export const adminSidebarItems: ISidebarItem[] = [
         component: AgentManagement,
       },
       {
-        title: "Manage Agent and user",
-        url: "manageagent",
-        component: ManageUsersAndAgents,
+        title: "transaction list",
+        url: "transction",
+        component: TransactionList,
       },
     ],
   },

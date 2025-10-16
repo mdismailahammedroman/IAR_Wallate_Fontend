@@ -1,81 +1,170 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   useFetchAgentsQuery,
   useBlockUnblockUserMutation,
   useApproveAgentMutation,
   useSuspendAgentMutation,
 } from "@/redux/features/auth/auth.api";
-
-import { Button } from "@/components/ui/button"; // assuming shadcn button
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const AgentManagement = () => {
-  const { data: agentsData, isLoading, error } = useFetchAgentsQuery();
+  const { data: agentsData, isLoading, error, refetch } = useFetchAgentsQuery();
   const [blockUnblockUser] = useBlockUnblockUserMutation();
   const [approveAgent] = useApproveAgentMutation();
   const [suspendAgent] = useSuspendAgentMutation();
 
-  if (isLoading) return <p>Loading agents...</p>;
-  if (error) return <p>Error loading agents.</p>;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<"all" | "approved" | "pending" | "suspended" | "blocked">("all");
 
   const handleBlockUnblock = async (id: string, action: "block" | "unblock") => {
     try {
       await blockUnblockUser({ id, action }).unwrap();
-      alert(`User ${action}ed successfully.`);
+      toast.success(`Agent ${action}ed successfully`);
+      refetch();
     } catch {
-      alert(`Failed to ${action} user.`);
+      toast.error(`Failed to ${action} agent`);
     }
   };
 
   const handleApprove = async (id: string) => {
     try {
       await approveAgent(id).unwrap();
-      alert("Agent approved.");
+      toast.success("Agent approved");
+      refetch();
     } catch {
-      alert("Failed to approve agent.");
+      toast.error("Failed to approve agent");
     }
   };
 
   const handleSuspend = async (id: string) => {
     try {
       await suspendAgent(id).unwrap();
-      alert("Agent suspended.");
+      toast.success("Agent suspended");
+      refetch();
     } catch {
-      alert("Failed to suspend agent.");
+      toast.error("Failed to suspend agent");
     }
   };
 
+  if (isLoading) return <p className="text-center">Loading agents...</p>;
+  if (error) return <p className="text-center text-red-500">Error loading agents.</p>;
+
+  const allAgents = agentsData?.data || [];
+
+  const filteredAgents = allAgents.filter((agent) => {
+    const matchesSearch =
+      agent.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      agent.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      filter === "all"
+        ? true
+        : filter === "blocked"
+        ? agent.isActive === "BLOCKED"
+        : agent.userStatus === filter.toUpperCase();
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8 text-center">Agent Management</h1>
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Agent Management</h1>
+
+      {/* 🔍 Search + Filter Section */}
+      <div className="flex flex-col md:flex-row justify-between items-stretch gap-4 mb-6">
+        <Input
+          placeholder="Search by name or email"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full md:w-1/2"
+        />
+
+        <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+          {["all", "approved", "pending", "suspended", "blocked"].map((status) => (
+            <Button
+              key={status}
+              variant={filter === status ? "default" : "outline"}
+              onClick={() => setFilter(status as any)}
+              className="text-sm"
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Agent List */}
       <ul className="space-y-4">
-        {agentsData?.data.map((agent) => (
-          <li key={agent._id} className="p-4 border rounded flex justify-between items-center">
-            <div>
-              <p className="font-semibold">{agent.name}</p>
-              <p className="text-sm text-gray-500">{agent.email}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  handleBlockUnblock(agent._id, agent.isBlocked ? "unblock" : "block")
-                }
+        {filteredAgents.length === 0 ? (
+          <p className="text-center text-gray-500">No agents found.</p>
+        ) : (
+          filteredAgents.map((agent) => {
+            const isBlocked = agent.isActive === "BLOCKED";
+            const userStatus = agent.userStatus;
+
+            return (
+              <li
+                key={agent._id}
+                className="p-4 border rounded flex flex-col sm:flex-row justify-between sm:items-center gap-4"
               >
-                {agent.isBlocked ? "Unblock" : "Block"}
-              </Button>
-              {!agent.isApproved && (
-                <Button variant="secondary" onClick={() => handleApprove(agent._id)}>
-                  Approve
-                </Button>
-              )}
-              {agent.isApproved && (
-                <Button variant="destructive" onClick={() => handleSuspend(agent._id)}>
-                  Suspend
-                </Button>
-              )}
-            </div>
-          </li>
-        ))}
+                <div className="flex-1">
+                  <p className="font-semibold text-base">{agent.name}</p>
+                  <p className="text-sm text-gray-500">{agent.email}</p>
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {userStatus && (
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full 
+                          ${
+                            userStatus === "APPROVED"
+                              ? "bg-green-100 text-green-700"
+                              : userStatus === "PENDING"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : userStatus === "SUSPENDED"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                      >
+                        {userStatus}
+                      </span>
+                    )}
+                    {isBlocked && (
+                      <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                        Blocked
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      handleBlockUnblock(agent._id, isBlocked ? "unblock" : "block")
+                    }
+                  >
+                    {isBlocked ? "Unblock" : "Block"}
+                  </Button>
+
+                  {(userStatus === "PENDING" || userStatus === "SUSPENDED") && (
+                    <Button size="sm" variant="secondary" onClick={() => handleApprove(agent._id)}>
+                      Approve
+                    </Button>
+                  )}
+
+                  {userStatus === "APPROVED" && (
+                    <Button size="sm" variant="destructive" onClick={() => handleSuspend(agent._id)}>
+                      Suspend
+                    </Button>
+                  )}
+                </div>
+              </li>
+            );
+          })
+        )}
       </ul>
     </div>
   );
