@@ -8,6 +8,7 @@ import type {
   ISearchedUser,
   IsendOtp,
   IverifyOtp,
+  OverviewResponse,
   UpdateUserPayload,
 } from "@/types/auth.types";
 
@@ -119,6 +120,14 @@ suspendAgent: builder.mutation({
   }),
   invalidatesTags: ["AGENT"],
 }),
+getOverview: builder.query<IResponse<OverviewResponse>, void>({
+  query: () => ({
+    url: "/user/all-users",
+    method: "GET",
+  }),
+  providesTags: ["USER", "AGENT"],
+}),
+
   }),
 });
 export const {
@@ -135,4 +144,5 @@ export const {
   useFetchAgentsQuery,
   useApproveAgentMutation,
   useSuspendAgentMutation,
+  useGetOverviewQuery,
 } = authApi;

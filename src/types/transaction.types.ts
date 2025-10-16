@@ -27,17 +27,6 @@ export interface IWallet {
   updatedAt: string;
 }
 
-// --- Transaction Interface ---
-export interface ITransaction {
-  _id: string;
-  transactionType: "SEND" | "WITHDRAW" | "ADD"|"CASH_IN"| "CASH_OUT"; // Add union if known
-  fromUser?: IUser;
-  toUser?: IUser;
-  toAgent?: IUser;
-  amount: number;
-  status: "PENDING" | "COMPLETED" | "FAILED"; // Improve typing
-  createdAt: string;
-}
 
 // --- Transaction Response ---
 export interface ISendMoneyResponse {
@@ -76,7 +65,7 @@ export interface ICashOutPayload {
 
 export interface ITransaction {
   _id: string;
-  type: "SEND" | "WITHDRAW" | "ADD" | "CASH_IN" | "CASH_OUT";
+  transactionType: "SEND" | "WITHDRAW" | "ADD" | "CASH_IN" | "CASH_OUT";
   amount: number;
   from: string;
   to: string;
@@ -102,10 +91,11 @@ export interface ITransaction {
 }
 
 export interface IPaginatedResponse<T> {
+  success: boolean;
+  message?: string;
   data: T[];
   total: number;
   page: number;
   limit: number;
-  success: boolean;
-  message?: string;
 }
+

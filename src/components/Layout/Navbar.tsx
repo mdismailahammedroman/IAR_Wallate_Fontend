@@ -40,9 +40,8 @@ export default function Navbar() {
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
 
-  const { data, isLoading, isError, error } = useUserInfoQuery(undefined);
+  const { data} = useUserInfoQuery(undefined);
 
-console.log("User Info Response:", { isLoading, isError, error });
 
   const userRole = data?.data?.role;
   const userEmail = data?.data?.email;

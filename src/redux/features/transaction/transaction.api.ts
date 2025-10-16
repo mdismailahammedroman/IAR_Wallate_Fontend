@@ -15,21 +15,29 @@ import type {
 
 export const transactionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    sendMoney: builder.mutation<IResponse<ITransactionResponse>, ISendMoneyPayload>({
+    sendMoney: builder.mutation<
+      IResponse<ITransactionResponse>,
+      ISendMoneyPayload
+    >({
       query: (data) => ({
         url: "/transactions/send-money",
         method: "POST",
         data,
       }),
     }),
-    addMoney: builder.mutation<IResponse<ITransactionResponse>, IAmountPayload>({
-      query: (data) => ({
-        url: "/transactions/add-money",
-        method: "POST",
-        data,
-      }),
-    }),
-    withdrawMoney: builder.mutation<IResponse<ITransactionResponse>, IWithdrawPayload>({
+    addMoney: builder.mutation<IResponse<ITransactionResponse>, IAmountPayload>(
+      {
+        query: (data) => ({
+          url: "/transactions/add-money",
+          method: "POST",
+          data,
+        }),
+      }
+    ),
+    withdrawMoney: builder.mutation<
+      IResponse<ITransactionResponse>,
+      IWithdrawPayload
+    >({
       query: (data) => ({
         url: "/transactions/withdraw",
         method: "POST",
@@ -45,22 +53,24 @@ export const transactionApi = baseApi.injectEndpoints({
         data,
       }),
     }),
-    cashOut: builder.mutation<IResponse<ITransactionResponse>, ICashOutPayload>({
-      query: (data) => ({
-        url: "/transactions/cash-out",
-        method: "POST",
-        data,
+    cashOut: builder.mutation<IResponse<ITransactionResponse>, ICashOutPayload>(
+      {
+        query: (data) => ({
+          url: "/transactions/cash-out",
+          method: "POST",
+          data,
+        }),
+      }
+    ),
+    // in transactionApi
+    getAllTransactions: builder.query<IPaginatedResponse<ITransaction>, any>({
+
+      query: (params) => ({
+        url: "/transactions/all-transactions",
+        method: "GET",
+        params,
       }),
     }),
-    // in transactionApi
-getAllTransactions: builder.query<IPaginatedResponse<ITransaction[]>, any>({
-  query: (params) => ({
-    url: "/transactions/all-transactions",
-    method: "GET",
-    params,
-  }),
-}),
-
   }),
 });
 
@@ -71,5 +81,4 @@ export const {
   useCashInMutation,
   useCashOutMutation,
   useGetAllTransactionsQuery,
-
 } = transactionApi;

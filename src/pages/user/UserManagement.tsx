@@ -6,6 +6,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // ShadCN input
+import { Skeleton } from "@/components/ui/skeleton"; // <-- Import Skeleton
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -25,9 +26,6 @@ const UserManagement = () => {
       toast.error(`Failed to ${action} user`, error);
     }
   };
-
-  if (isLoading) return <p className="text-center">Loading users...</p>;
-  if (error) return <p className="text-center text-red-500">Failed to load users.</p>;
 
   const allUsers = data?.data?.filter((user) => user.role === "USER") || [];
 
@@ -83,7 +81,26 @@ const UserManagement = () => {
       </div>
 
       {/* 🧑‍💼 User List */}
-      {filteredUsers.length === 0 ? (
+
+      {isLoading ? (
+        <ul className="space-y-4">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <li
+              key={idx}
+              className="p-4 border rounded flex justify-between items-center"
+            >
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-48 rounded-md" />
+                <Skeleton className="h-4 w-64 rounded-md" />
+                <Skeleton className="h-4 w-20 rounded-full mt-1" />
+              </div>
+              <Skeleton className="h-10 w-20 rounded-md" />
+            </li>
+          ))}
+        </ul>
+      ) : error ? (
+        <p className="text-center text-red-500">Failed to load users.</p>
+      ) : filteredUsers.length === 0 ? (
         <p className="text-center text-gray-500">No users match your criteria.</p>
       ) : (
         <ul className="space-y-4">

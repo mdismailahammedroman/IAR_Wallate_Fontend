@@ -128,3 +128,14 @@ export const Role = {
 } as const;
 
 export type Role = (typeof Role)[keyof typeof Role];
+
+export interface OverviewResponse {
+  totalUsers: number;
+  totalAgents: number;
+  transactionCount: number;
+  transactionVolume: {
+    deposit: number;
+    withdraw: number;
+    transfer: number;
+  };
+}

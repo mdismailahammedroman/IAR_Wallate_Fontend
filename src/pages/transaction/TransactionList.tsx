@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useGetAllTransactionsQuery } from "@/redux/features/transaction/transaction.api";
 import {
   Select,
@@ -16,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { ChevronDownIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TransactionList = () => {
   const [fromOpen, setFromOpen] = useState(false);
@@ -30,9 +32,8 @@ const TransactionList = () => {
     search: "",
   });
 
-  // Pagination state
   const [page, setPage] = useState(1);
-  const limit = 10; // You can allow user to change this too
+  const limit = 10;
 
   const clearAllFilters = () => {
     setFilters({
@@ -43,7 +44,7 @@ const TransactionList = () => {
     });
     setFromDate(undefined);
     setToDate(undefined);
-    setPage(1); // reset to first page
+    setPage(1);
   };
 
   const queryFilters = useMemo(() => ({
@@ -56,25 +57,22 @@ const TransactionList = () => {
     }),
     page,
     limit,
-  }), [filters.role, filters.transactionType, filters.search, fromDate, toDate, page]);
+  }), [filters, fromDate, toDate, page]);
 
   const {
-  data: response,
-  isLoading,
-} = useGetAllTransactionsQuery(queryFilters, {
-  refetchOnMountOrArgChange: true,
-});
+    data: response,
+    isLoading,
+  } = useGetAllTransactionsQuery(queryFilters, {
+    refetchOnMountOrArgChange: true,
+  });
 
-const transactions = Array.isArray(response?.data) ? response.data : [];
-const totalCount = response?.total ?? 0;
-const totalPages = Math.ceil(totalCount / limit);
+  const transactions = Array.isArray(response?.data) ? response.data : [];
+  const totalCount = (response as any)?.total ?? 0; // fallback if typing is incorrect
+  const totalPages = Math.ceil(totalCount / limit);
 
   const handleInput = (key: string, value: string) => {
-    setFilters(prev => {
-      const next = { ...prev, [key]: value };
-      return next;
-    });
-    setPage(1); // Reset to first page when filters change
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPage(1);
   };
 
   return (
@@ -164,8 +162,30 @@ const totalPages = Math.ceil(totalCount / limit);
 
       {/* Transactions Table */}
       {isLoading ? (
-        <div className="flex justify-center items-center h-40">
-          <div className="w-10 h-10 border-4 border-t-gray-500 border-gray-300 rounded-full animate-spin" />
+        <div className="overflow-x-auto rounded-md border mb-4">
+          <table className="min-w-full text-sm text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3">Date</th>
+                <th className="p-3">User</th>
+                <th className="p-3">Type</th>
+                <th className="p-3">Amount</th>
+                <th className="p-3">From</th>
+                <th className="p-3">To</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 10 }).map((_, rowIdx) => (
+                <tr key={rowIdx} className="border-t">
+                  {Array.from({ length: 6 }).map((_, colIdx) => (
+                    <td key={colIdx} className="p-3">
+                      <Skeleton className="h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : transactions.length === 0 ? (
         <p className="text-center text-gray-500">No transactions found.</p>
@@ -184,13 +204,11 @@ const totalPages = Math.ceil(totalCount / limit);
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx) => (
+                {transactions.map((tx: any) => (
                   <tr key={tx._id} className="border-t hover:bg-gray-50">
                     <td className="p-3">{format(new Date(tx.createdAt), "dd MMM yyyy")}</td>
                     <td className="p-3">
-                      {tx.initiatedByUser?.name ||
-                        tx.initiatedByAgent?.name ||
-                        "N/A"}
+                      {tx.initiatedByUser?.name || tx.initiatedByAgent?.name || "N/A"}
                     </td>
                     <td className="p-3">{tx.transactionType?.replace("_", " ") || "N/A"}</td>
                     <td className="p-3">${tx.amount}</td>

@@ -5,17 +5,15 @@ import { getSidebarItems } from "@/utils/getSidebarItems";
 import { Separator } from "../ui/separator";
 import ModeToggle from "./mode.toggle";
 import AppSidebar from "../ui/app-sidebar";
+import { Spinner } from "../ui/spinner";
 
  const DashboardLayout = () => {
   const { data, isLoading } = useUserInfoQuery();
 
   if (isLoading) {
     return    <div className="flex items-center justify-center h-screen">
-      <div className="flex flex-row gap-2">
-  <div className="w-4 h-4 rounded-full bg-gray-400 animate-bounce"></div>
-  <div className="w-4 h-4 rounded-full bg-gray-400 animate-bounce [animation-delay:-.3s]"></div>
-  <div className="w-4 h-4 rounded-full bg-gray-400 animate-bounce [animation-delay:-.5s]"></div>
-</div>
+            <Spinner className="size-8" />
+
     </div>
   }
 

@@ -7,6 +7,7 @@ import {
 } from "@/redux/features/auth/auth.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -49,12 +50,9 @@ const AgentManagement = () => {
     }
   };
 
-  if (isLoading) return <p className="text-center">Loading agents...</p>;
-  if (error) return <p className="text-center text-red-500">Error loading agents.</p>;
-
   const allAgents = agentsData?.data || [];
 
-  const filteredAgents = allAgents.filter((agent) => {
+  const filteredAgents = allAgents.filter((agent: any) => {
     const matchesSearch =
       agent.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       agent.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -88,20 +86,39 @@ const AgentManagement = () => {
               key={status}
               variant={filter === status ? "default" : "outline"}
               onClick={() => setFilter(status as any)}
-              className="text-sm"
+              className="text-sm capitalize"
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {status}
             </Button>
           ))}
         </div>
       </div>
 
-      {/* Agent List */}
-      <ul className="space-y-4">
-        {filteredAgents.length === 0 ? (
-          <p className="text-center text-gray-500">No agents found.</p>
-        ) : (
-          filteredAgents.map((agent) => {
+      {/* Loading Skeletons */}
+      {isLoading ? (
+        <ul className="space-y-4">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <li key={idx} className="p-4 border rounded flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-4 w-20 mt-2" />
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : error ? (
+        <p className="text-center text-red-500">Error loading agents.</p>
+      ) : filteredAgents.length === 0 ? (
+        <p className="text-center text-gray-500">No agents found.</p>
+      ) : (
+        <ul className="space-y-4">
+          {filteredAgents.map((agent: any) => {
             const isBlocked = agent.isActive === "BLOCKED";
             const userStatus = agent.userStatus;
 
@@ -163,9 +180,9 @@ const AgentManagement = () => {
                 </div>
               </li>
             );
-          })
-        )}
-      </ul>
+          })}
+        </ul>
+      )}
     </div>
   );
 };
