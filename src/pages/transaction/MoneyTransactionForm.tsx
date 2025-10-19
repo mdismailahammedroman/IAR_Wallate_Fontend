@@ -19,6 +19,7 @@ import {
 } from "@/redux/features/transaction/transaction.api";
 import { useLocation } from "react-router";
 import { toast } from "sonner";
+import { useMyWalletQuery } from "@/redux/features/wallet/wallet.api";
 
 
 
@@ -86,6 +87,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
     const [withdrawMoney, { isLoading: withdrawing }] = useWithdrawMoneyMutation();
     const [cashIn, { isLoading: cashingIn }] = useCashInMutation();
     const [cashOut, { isLoading: cashingOut }] = useCashOutMutation();
+    const { refetch: refetchWallet } = useMyWalletQuery();
 
     const location = useLocation();
 
@@ -184,7 +186,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                     amount: formData.amount,
                 }).unwrap();
             }
-
+              await refetchWallet()
             // Extract transaction & balances from response
             // Adjust this to match your backend response structure
             const tx = response?.data?.transaction || response?.transaction || {};
@@ -239,7 +241,7 @@ export const MoneyTransactionForm = ({ type }: Props) => {
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         {(type === "send" ||  type === "add" || type === "withdraw" || type === "cashin" || type === "cashout") && (
                             <div>
-                                <Label className="m-1">{type === "send" ? "Search User" : "Search Agent (by name or email)"}</Label>
+                                <Label className="m-1">{type === "send" ? "Search Agent or User":"Search User" }</Label>
                                 <Input
                                     placeholder="Search by name or email..."
                                     value={searchTerm}

@@ -24,6 +24,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data,
       }),
+       invalidatesTags: ["Wallet"],
     }),
     addMoney: builder.mutation<IResponse<ITransactionResponse>, IAmountPayload>(
       {
@@ -32,6 +33,7 @@ export const transactionApi = baseApi.injectEndpoints({
           method: "POST",
           data,
         }),
+         invalidatesTags: ["Wallet"],
       }
     ),
     withdrawMoney: builder.mutation<
@@ -43,6 +45,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data,
       }),
+       invalidatesTags: ["Wallet"],
     }),
 
     // ✅ NEW
@@ -52,6 +55,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data,
       }),
+       invalidatesTags: ["Wallet"],
     }),
     cashOut: builder.mutation<IResponse<ITransactionResponse>, ICashOutPayload>(
       {
@@ -60,6 +64,7 @@ export const transactionApi = baseApi.injectEndpoints({
           method: "POST",
           data,
         }),
+         invalidatesTags: ["Wallet"],
       }
     ),
     // in transactionApi

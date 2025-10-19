@@ -14,6 +14,7 @@ export const walletApi = baseApi.injectEndpoints({
         url: "/wallets/me",
         method: "GET",
       }),
+       providesTags: ["Wallet"],
     }),
     myTransactions: builder.query<
       IResponse<ITransactionListResponse>,
@@ -39,6 +40,8 @@ export const walletApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
+providesTags: ["Wallet"],
+
     }),
   }),
 });
