@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDownIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 const TransactionList = () => {
   const [fromOpen, setFromOpen] = useState(false);
@@ -87,7 +88,12 @@ const TransactionList = () => {
     setPage(1);
   };
   console.log("Query Filters:", queryFilters);
+if (isLoading) {
+    return    <div className="flex items-center justify-center h-screen">
+            <Spinner className="size-8" />
 
+    </div>
+  }
 
   return (
     <div className="container mx-auto px-4 py-6">

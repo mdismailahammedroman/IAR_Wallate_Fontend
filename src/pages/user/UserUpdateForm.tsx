@@ -7,6 +7,7 @@ import type { UpdateUserPayload } from '@/types/auth.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Spinner } from '@/components/ui/spinner';
 
 export const UserUpdateForm: React.FC = () => {
   // Fetch user info
@@ -56,7 +57,12 @@ export const UserUpdateForm: React.FC = () => {
     }
   };
 
-  if (isLoading) return <p>Loading user data...</p>;
+  if (isLoading) {
+    return    <div className="flex items-center justify-center h-screen">
+            <Spinner className="size-8" />
+
+    </div>
+  }
   if (isError) return <p>Error loading user data.</p>;
 
   return (

@@ -20,6 +20,7 @@ export interface ILoginRespons {
   accessToken: string
   refreshToken: string
   user:ILoginAndRegister
+  role:Role
 }
 
 export interface ILoginAndRegister {

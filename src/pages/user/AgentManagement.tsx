@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 const AgentManagement = () => {
   const { data: agentsData, isLoading, error, refetch } = useFetchAgentsQuery();
@@ -19,6 +20,14 @@ const AgentManagement = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<"all" | "approved" | "pending" | "suspended" | "blocked">("all");
+
+  if (isLoading) {
+      return    <div className="flex items-center justify-center h-screen">
+              <Spinner className="size-8" />
+  
+      </div>
+    }
+
 
   const handleBlockUnblock = async (id: string, action: "block" | "unblock") => {
     try {
@@ -66,6 +75,7 @@ const AgentManagement = () => {
 
     return matchesSearch && matchesStatus;
   });
+
 
   return (
     <div className="container mx-auto px-4 py-6">

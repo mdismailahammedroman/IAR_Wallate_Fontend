@@ -9,14 +9,23 @@ import { Input } from "@/components/ui/input"; // ShadCN input
 import { Skeleton } from "@/components/ui/skeleton"; // <-- Import Skeleton
 import { toast } from "sonner";
 import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 const UserManagement = () => {
   const { data, isLoading, error, refetch } = useFetchUsersQuery();
   const [blockUnblockUser] = useBlockUnblockUserMutation();
 
+  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "blocked">("all");
 
+   if (isLoading) {
+      return    <div className="flex items-center justify-center h-screen">
+              <Spinner className="size-8" />
+  
+      </div>
+    }
   const handleBlockUnblock = async (id: string, action: "block" | "unblock") => {
     try {
       await blockUnblockUser({ id, action }).unwrap();
@@ -44,6 +53,7 @@ const UserManagement = () => {
 
     return matchesSearch && matchesStatus;
   });
+  
 
   return (
     <div className="container mx-auto p-6">

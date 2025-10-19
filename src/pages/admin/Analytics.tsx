@@ -21,6 +21,7 @@ import {
 import { useRef, useEffect } from "react";
 import { useGetOverviewQuery } from "@/redux/features/auth/auth.api";
 import TransactionAnalytics from "./TransactionAnalytics";
+import { Spinner } from "@/components/ui/spinner";
 
 // Register necessary Chart.js components
 ChartJSInstance.register(
@@ -117,6 +118,12 @@ const Analytics = () => {
       },
     },
   };
+  if (isLoading) {
+      return    <div className="flex items-center justify-center h-screen">
+              <Spinner className="size-8" />
+  
+      </div>
+    }
 
   if (error) {
     return (

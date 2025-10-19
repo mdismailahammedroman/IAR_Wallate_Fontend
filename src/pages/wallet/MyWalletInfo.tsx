@@ -45,6 +45,7 @@ export function MyWalletInfo() {
     limit: 5,
     page: 1,
   });
+  
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const transactions = txnResp?.data?.transactions || [];
 

@@ -6,6 +6,7 @@ import { useChangePasswordMutation } from "@/redux/features/auth/auth.api";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 type FormData = {
   oldPassword: string;
@@ -21,6 +22,12 @@ const ChangePasswordForm = () => {
   } = useForm<FormData>();
 
   const [changePassword, { isLoading }] = useChangePasswordMutation();
+   if (isLoading) {
+      return    <div className="flex items-center justify-center h-screen">
+              <Spinner className="size-8" />
+  
+      </div>
+    }
 
   const onSubmit = async (data: FormData) => {
     if (data.newPassword !== data.confirmPassword) {
@@ -39,6 +46,7 @@ const ChangePasswordForm = () => {
       toast.error(error?.data?.message || "Failed to change password.");
     }
   };
+ 
 
   return (
     <form

@@ -41,10 +41,19 @@ const LoginForm = () => {
 const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
   try {
     const res = await login(data).unwrap();
-    if (res.success) {
-      toast.success("Logged in successfully");
-      navigate("/");
-    }
+  if (res.success) {
+  toast.success("Logged in successfully");
+  const role = res.data.role;  // assuming `role` comes back
+  if (role === "USER") {
+    navigate("/user/dashboard"); 
+    
+  } else if (role === "ADMIN" || role === "SUPER_ADMIN") {
+    navigate("/admin/dashboard");
+  } else {
+    navigate("/");
+  }
+}
+
   } catch (err: any) {
     console.error("Login error:", err);
 

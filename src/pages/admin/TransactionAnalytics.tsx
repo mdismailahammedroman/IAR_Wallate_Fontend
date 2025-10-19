@@ -18,6 +18,7 @@ import { useGetAllTransactionsQuery } from "@/redux/features/transaction/transac
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 ChartJS.register(
   CategoryScale,
@@ -80,7 +81,12 @@ const TransactionAnalytics = () => {
       },
     },
   };
+if (isLoading) {
+    return    <div className="flex items-center justify-center h-screen">
+            <Spinner className="size-8" />
 
+    </div>
+  }
   return (
     <div className="container mx-auto px-4 py-6">
       <Card>

@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 export const MyTransactionHistory = () => {
   const [limit] = useState(10);
@@ -49,7 +50,12 @@ export const MyTransactionHistory = () => {
     setPage(1);
     refetch();
   };
+  if (isLoading) {
+    return    <div className="flex items-center justify-center h-screen">
+            <Spinner className="size-8" />
 
+    </div>
+  }
   return (
     <Card>
       <CardHeader>

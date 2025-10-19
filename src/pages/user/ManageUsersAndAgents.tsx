@@ -38,34 +38,31 @@ const ManageUsersAndAgents = () => {
       {/* Users Section */}
       <section>
         <h2 className="text-2xl font-semibold mb-6">Manage Users</h2>
-        {usersData?.data?.length ? (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {usersData.data.map((user) => (
-              <li
-                key={user._id}
-                className="p-4 border border-gray-300 rounded-lg shadow hover:shadow-md"
-              >
-                <p className="text-lg font-medium">{user.name}</p>
-                <p className="text-sm text-gray-600">{user.email}</p>
-                <p className="mt-1 text-xs uppercase text-gray-400">User</p>
-                <p className="mt-2 font-semibold">
-                  Status:{" "}
-                  <span className={user.isBlocked ? "text-red-600" : "text-green-600"}>
-                    {user.isBlocked ? "Blocked" : "Active"}
-                  </span>
-                </p>
-                <button
-                  onClick={() => handleBlockUnblock(user._id, user.isBlocked)}
-                  disabled={blockLoading}
-                  className={`mt-3 px-4 py-2 rounded text-white ${
-                    user.isBlocked ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
-                  }`}
-                >
-                  {user.isBlocked ? "Unblock" : "Block"}
-                </button>
-              </li>
-            ))}
-          </ul>
+       {usersData?.data?.length ? (
+  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {usersData.data.map((user) => (
+      <li key={user._id} className="p-4 border border-gray-300 rounded-lg shadow hover:shadow-md">
+        <p className="text-lg font-medium">{user.name}</p>
+        <p className="text-sm text-gray-600">{user.email}</p>
+        <p className="mt-1 text-xs uppercase text-gray-400">User</p>
+        <p className="mt-2 font-semibold">
+          Status:{" "}
+          <span className={user.isBlocked ? "text-red-600" : "text-green-600"}>
+            {user.isBlocked ? "Blocked" : "Active"}
+          </span>
+        </p>
+        <button
+          onClick={() => handleBlockUnblock(user._id, user.isBlocked)}
+          disabled={blockLoading}
+          className={`mt-3 px-4 py-2 rounded text-white ${
+            user.isBlocked ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+          }`}
+        >
+          {user.isBlocked ? "Unblock" : "Block"}
+        </button>
+      </li>
+    ))}
+  </ul>
         ) : (
           <p>No users found.</p>
         )}
