@@ -26,11 +26,14 @@ const TransactionList = () => {
   const [toDate, setToDate] = useState<Date | undefined>();
 
   const [filters, setFilters] = useState({
-    role: "all",
-    transactionType: "all",
-    status: "all",
-    search: "",
-  });
+  role: "all",
+  transactionType: "all",
+  status: "all",
+  search: "",
+  minAmount: "",
+  maxAmount: "",
+});
+
 
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -41,23 +44,32 @@ const TransactionList = () => {
       transactionType: "all",
       status: "all",
       search: "",
+       minAmount: "",
+  maxAmount: "",
     });
     setFromDate(undefined);
     setToDate(undefined);
     setPage(1);
   };
 
-  const queryFilters = useMemo(() => ({
+ const queryFilters = useMemo(() => {
+  const q: any = {
     ...(filters.role !== "all" && { role: filters.role }),
     ...(filters.transactionType !== "all" && { transactionType: filters.transactionType }),
+    ...(filters.status !== "all" && { status: filters.status }),
     ...(filters.search && { search: filters.search }),
+    ...(filters.minAmount && { minAmount: Number(filters.minAmount) }),
+    ...(filters.maxAmount && { maxAmount: Number(filters.maxAmount) }),
     ...(fromDate && toDate && {
       from: fromDate.toISOString(),
       to: toDate.toISOString(),
     }),
     page,
     limit,
-  }), [filters, fromDate, toDate, page]);
+  };
+  return q;
+}, [filters, fromDate, toDate, page]);
+
 
   const {
     data: response,
@@ -74,18 +86,42 @@ const TransactionList = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setPage(1);
   };
+  console.log("Query Filters:", queryFilters);
+
 
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6 text-center">All Transactions</h1>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-6">
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-6">
+
         <Input
           placeholder="Search name/email/phone"
           value={filters.search}
           onChange={(e) => handleInput("search", e.target.value)}
         />
+          <Input
+    placeholder="Min Amount"
+    type="number"
+    value={filters.minAmount}
+    onChange={(e) => handleInput("minAmount", e.target.value)}
+  />
+  <Input
+    placeholder="Max Amount"
+    type="number"
+    value={filters.maxAmount}
+    onChange={(e) => handleInput("maxAmount", e.target.value)}
+  />
+  <Select onValueChange={(val) => handleInput("status", val)} value={filters.status}>
+    <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">All</SelectItem>
+      <SelectItem value="COMPLETED">Completed</SelectItem>
+      <SelectItem value="PENDING">Pending</SelectItem>
+      <SelectItem value="FAILED">Failed</SelectItem>
+    </SelectContent>
+  </Select>
 
         <Select onValueChange={(val) => handleInput("role", val)} value={filters.role}>
           <SelectTrigger>

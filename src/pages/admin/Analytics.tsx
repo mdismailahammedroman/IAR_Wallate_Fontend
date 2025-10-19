@@ -67,9 +67,21 @@ const totalVolume = pieValues.reduce((a, b) => a + b, 0);
           data?.data.transactionCount || 0,
         ],
         backgroundColor: ["#3b82f6", "#10b981", "#f59e0b"],
+        borderColor: "#e5e7eb",
       },
     ],
   };
+  const pieOptions = {
+  plugins: {
+    legend: {
+      display: false, // Hides the default legend
+    },
+    tooltip: {
+      enabled: true, // Optional: disables tooltips
+    },
+  },
+};
+
 
   if (error) {
     return (
@@ -86,20 +98,38 @@ const totalVolume = pieValues.reduce((a, b) => a + b, 0);
       {/* Chart Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Pie Chart Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Transaction Volume by Type</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-60 w-full">
-              {isLoading ? (
-                <Skeleton className="w-full h-full rounded-md" />
-              ) : (
-                <Pie data={pieData} />
-              )}
-            </div>
-          </CardContent>
-        </Card>
+       <Card>
+  <CardHeader>
+    <CardTitle>Transaction Volume by Type</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="flex h-60 w-full gap-4">
+      {/* Left side: Label / Description */}
+      <div className="w-1/3 flex flex-col justify-center items-start p-2">
+        <p className="text-sm text-muted-foreground mb-2">Volume Levels:</p>
+        {pieLabels.map((label, idx) => (
+          <div key={idx} className="flex items-center space-x-2 text-sm">
+            <span
+              className="inline-block w-3 h-3 rounded-full"
+              style={{ backgroundColor: pieData.datasets[0].backgroundColor[idx] }}
+            ></span>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Right side: Pie Chart */}
+     
+        {isLoading ? (
+          <Skeleton className="w-full h-full rounded-md" />
+        ) : (
+          <Pie data={pieData} options={pieOptions} />
+        )}
+      
+    </div>
+  </CardContent>
+</Card>
+
 
         {/* Bar Chart Card */}
         <Card>
@@ -107,11 +137,11 @@ const totalVolume = pieValues.reduce((a, b) => a + b, 0);
             <CardTitle>User / Agent / Transaction Counts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-60 w-full">
+            <div className="h-60 w-full border-amber-50">
               {isLoading ? (
                 <Skeleton className="w-full h-full rounded-md" />
               ) : (
-                <Bar data={barData} />
+                <Bar  data={barData} />
               )}
             </div>
           </CardContent>

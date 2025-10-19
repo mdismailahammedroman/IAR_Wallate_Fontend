@@ -1,5 +1,6 @@
 // src/routes/agentSidebarItems.ts
 import TransactionPage from "@/pages/transaction/TransactionPage";
+import ChangePasswordForm from "@/pages/user/ChangePasswordForm";
 import { UserProfile } from "@/pages/user/UserProfile";
 import { UserUpdateForm } from "@/pages/user/UserUpdateForm";
 import { MyTransactionHistory } from "@/pages/wallet/MyTransactionHistory";
@@ -20,6 +21,11 @@ export const agentSidebarItems: ISidebarItem[] = [
         url: "/user/update",
         component: UserUpdateForm,
       },
+          {
+      title: "Change Password",
+      url: "/user/change-password",
+      component: ChangePasswordForm,
+    },
     ],
   },
   {

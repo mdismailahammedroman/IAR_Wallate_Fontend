@@ -13,7 +13,7 @@ export const adminSidebarItems: ISidebarItem[] = [
     items: [
    
       {
-        title: "Update Profile",
+        title: "Dashbord",
         url: "analytics",
         component: Analytics,
       },
@@ -28,7 +28,7 @@ export const adminSidebarItems: ISidebarItem[] = [
         component: AgentManagement,
       },
       {
-        title: "transaction list",
+        title: "Transaction list",
         url: "transction",
         component: TransactionList,
       },

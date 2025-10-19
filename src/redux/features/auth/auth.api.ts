@@ -71,63 +71,74 @@ export const authApi = baseApi.injectEndpoints({
         data: updateData, // ✅ Use 'body' instead of 'data'
       }),
     }),
+
+    changePassword: builder.mutation<
+      void,
+        { oldPassword: string; newPassword: string; confirmPassword: string }
+
+    >({
+      query: (body) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        data:body,
+      }),
+    }),
     // Inside authApi.injectEndpoints(...)
-   searchUsers: builder.query<
-  IResponse<ISearchedUser[]>,
-  { name: string; roles: string[] }
->({
-  query: ({ name, roles }) => ({
-    url: `/user/search`,
-    method: "GET",
-    params: { name, roles: roles.join(",") },
-  }),
-}),
-fetchUsers: builder.query<IResponse<ISearchedUser[]>, void>({
+    searchUsers: builder.query<
+      IResponse<ISearchedUser[]>,
+      { name: string; roles: string[] }
+    >({
+      query: ({ name, roles }) => ({
+        url: `/user/search`,
+        method: "GET",
+        params: { name, roles: roles.join(",") },
+      }),
+    }),
+    fetchUsers: builder.query<IResponse<ISearchedUser[]>, void>({
       query: () => ({
         url: "/user/users",
         method: "GET",
       }),
       providesTags: ["USER"],
     }),
-     fetchAgents: builder.query<IResponse<ISearchedUser[]>, void>({
+    fetchAgents: builder.query<IResponse<ISearchedUser[]>, void>({
       query: () => ({
         url: "/user/agents",
         method: "GET",
       }),
       providesTags: ["AGENT"],
     }),
-      blockUnblockUser: builder.mutation({
-  query: ({ id, action }: { id: string; action: "block" | "unblock" }) => ({
-    url: `/user/block-unblock/${id}`,  // Remove /user/users/ prefix, use exact route
-    method: "PATCH",
-    data: { action },
-  }),
-  invalidatesTags: ["USER"],
-}),
+    blockUnblockUser: builder.mutation({
+      query: ({ id, action }: { id: string; action: "block" | "unblock" }) => ({
+        url: `/user/block-unblock/${id}`, // Remove /user/users/ prefix, use exact route
+        method: "PATCH",
+        data: { action },
+      }),
+      invalidatesTags: ["USER"],
+    }),
 
-approveAgent: builder.mutation({
-  query: (id: string) => ({
-    url: `/user/approve-agent/${id}`,  // Adjusted URL
-    method: "PATCH",
-  }),
-  invalidatesTags: ["AGENT"],
-}),
+    approveAgent: builder.mutation({
+      query: (id: string) => ({
+        url: `/user/approve-agent/${id}`, // Adjusted URL
+        method: "PATCH",
+      }),
+      invalidatesTags: ["AGENT"],
+    }),
 
-suspendAgent: builder.mutation({
-  query: (id: string) => ({
-    url: `/user/suspend-agent/${id}`,  // Adjusted URL
-    method: "PATCH",
-  }),
-  invalidatesTags: ["AGENT"],
-}),
-getOverview: builder.query<IResponse<OverviewResponse>, void>({
-  query: () => ({
-    url: "/user/all-users",
-    method: "GET",
-  }),
-  providesTags: ["USER", "AGENT"],
-}),
-
+    suspendAgent: builder.mutation({
+      query: (id: string) => ({
+        url: `/user/suspend-agent/${id}`, // Adjusted URL
+        method: "PATCH",
+      }),
+      invalidatesTags: ["AGENT"],
+    }),
+    getOverview: builder.query<IResponse<OverviewResponse>, void>({
+      query: () => ({
+        url: "/user/all-users",
+        method: "GET",
+      }),
+      providesTags: ["USER", "AGENT"],
+    }),
   }),
 });
 export const {
@@ -138,8 +149,9 @@ export const {
   useVerifyOtpMutation,
   useUserInfoQuery,
   useUpdateUserMutation,
+  useChangePasswordMutation,
   useSearchUsersQuery,
-    useFetchUsersQuery,
+  useFetchUsersQuery,
   useBlockUnblockUserMutation,
   useFetchAgentsQuery,
   useApproveAgentMutation,
