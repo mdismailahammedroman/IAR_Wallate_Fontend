@@ -17,6 +17,7 @@ import type { ISidebarItem } from "@/types"
 
 interface AppSidebarProps {
   items: ISidebarItem[];
+   className?: string;
 }
 
 export default function AppSidebar({ items, ...props }: AppSidebarProps) {

@@ -2,7 +2,23 @@
 @import "tw-animate-css";
 @import 'shepherd.js/dist/css/shepherd.css';
 
+.shepherd-element {
+  max-width: 200px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+}
+
+.shepherd-button {
+  background-color: white;
+  color: #4f46e5;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+
 @custom-variant dark (&:is(.dark *));
+
+
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

@@ -6,7 +6,6 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Pie, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJSInstance,
@@ -19,11 +18,11 @@ import {
   Chart,
 } from "chart.js";
 import { useRef, useEffect } from "react";
-import { useGetOverviewQuery } from "@/redux/features/auth/auth.api";
+import { useGetOverviewQuery, useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import TransactionAnalytics from "./TransactionAnalytics";
 import { Spinner } from "@/components/ui/spinner";
+import Shepherd from "shepherd.js";
 
-// Register necessary Chart.js components
 ChartJSInstance.register(
   ArcElement,
   Tooltip,
@@ -35,25 +34,94 @@ ChartJSInstance.register(
 
 const Analytics = () => {
   const { data, isLoading, error } = useGetOverviewQuery();
+  const user = useUserInfoQuery()
+  const role = user?.data?.role;
 
   const volume = data?.data.transactionVolume || {};
   const pieLabels = Object.keys(volume);
   const pieValues = Object.values(volume) as number[];
   const totalVolume = pieValues.reduce((a, b) => a + b, 0);
 
-  // Chart references
   const pieChartRef = useRef<Chart<"pie"> | null>(null);
   const barChartRef = useRef<Chart<"bar"> | null>(null);
 
   // Resize fix on load
   useEffect(() => {
-    if (pieChartRef.current) {
-      pieChartRef.current.resize();
-    }
-    if (barChartRef.current) {
-      barChartRef.current.resize();
-    }
+    if (pieChartRef.current) pieChartRef.current.resize();
+    if (barChartRef.current) barChartRef.current.resize();
   }, [data]);
+
+  // Shepherd admin-only tour
+  useEffect(() => {
+    if (role === "admin" || role === "superadmin") {
+      const tour = new Shepherd.Tour({
+        defaultStepOptions: {
+          cancelIcon: { enabled: true },
+          scrollTo: { behavior: "smooth", block: "center" },
+          canClickTarget: false,
+        },
+        useModalOverlay: true,
+      });
+
+      tour.addStep({
+        id: "dashboard-title",
+        title: "Welcome to the Analytics!",
+        text: "This dashboard provides a snapshot of users, agents, and transaction volume.",
+        attachTo: {
+          element: ".dashboard-title",
+          on: "bottom",
+        },
+        buttons: [
+          {
+            text: "Next",
+            action: tour.next,
+          },
+        ],
+      });
+
+      tour.addStep({
+        id: "dashboard-chart",
+        title: "Charts Overview",
+        text: "Here are visual breakdowns of transaction volumes and user stats.",
+        attachTo: {
+          element: ".dashboard-chart",
+          on: "top",
+        },
+        buttons: [
+          {
+            text: "Back",
+            action: tour.back,
+          },
+          {
+            text: "Next",
+            action: tour.next,
+          },
+        ],
+      });
+
+      tour.addStep({
+        id: "transaction-analytics",
+        title: "Detailed Analytics",
+        text: "Dive deeper into transaction history and patterns below.",
+        attachTo: {
+          element: "#transaction-analytics", // Make sure this ID exists
+          on: "top",
+        },
+        buttons: [
+          {
+            text: "Back",
+            action: tour.back,
+          },
+          {
+            text: "Done",
+            action: tour.complete,
+          },
+        ],
+      });
+
+      tour.start();
+    }
+  }, [role]);
 
   const pieData = {
     labels: pieLabels,
@@ -61,12 +129,12 @@ const Analytics = () => {
       {
         data: pieValues,
         backgroundColor: [
-          "#3b82f6", // blue
-          "#10b981", // green
-          "#ef4444", // red
-          "#f59e0b", // yellow
-          "#8b5cf6", // purple
-          "#ec4899", // pink
+          "#3b82f6",
+          "#10b981",
+          "#ef4444",
+          "#f59e0b",
+          "#8b5cf6",
+          "#ec4899",
         ],
         borderColor: "#fff",
         borderWidth: 2,
@@ -95,12 +163,8 @@ const Analytics = () => {
     maintainAspectRatio: false,
     responsive: true,
     plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        enabled: true,
-      },
+      legend: { display: false },
+      tooltip: { enabled: true },
     },
   };
 
@@ -108,22 +172,20 @@ const Analytics = () => {
     maintainAspectRatio: false,
     responsive: true,
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
     },
     scales: {
-      y: {
-        beginAtZero: true,
-      },
+      y: { beginAtZero: true },
     },
   };
+
   if (isLoading) {
-      return    <div className="flex items-center justify-center h-screen">
-              <Spinner className="size-8" />
-  
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner className="size-8" />
       </div>
-    }
+    );
+  }
 
   if (error) {
     return (
@@ -135,10 +197,12 @@ const Analytics = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      <h1 className="text-2xl font-bold text-center">Analytics Dashboard</h1>
+      <h1 className="text-2xl font-bold text-center dashboard-title">
+        Analytics Dashboard
+      </h1>
 
       {/* Chart Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 dashboard-chart">
         {/* Pie Chart Card */}
         <Card>
           <CardHeader>
@@ -146,7 +210,6 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="flex h-60 w-full gap-4">
-              {/* Labels */}
               <div className="w-1/3 flex flex-col justify-center items-start p-2">
                 <p className="text-sm text-muted-foreground mb-2">
                   Volume Levels:
@@ -168,17 +231,8 @@ const Analytics = () => {
                 ))}
               </div>
 
-              {/* Pie Chart */}
               <div className="w-2/3 h-full">
-                {isLoading ? (
-                  <Skeleton className="w-full h-full rounded-md" />
-                ) : (
-                  <Pie
-                    ref={pieChartRef}
-                    data={pieData}
-                    options={pieOptions}
-                  />
-                )}
+                <Pie ref={pieChartRef} data={pieData} options={pieOptions} />
               </div>
             </div>
           </CardContent>
@@ -191,20 +245,17 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="h-60 w-full">
-              {isLoading ? (
-                <Skeleton className="w-full h-full rounded-md" />
-              ) : (
-                <Bar
-                  ref={barChartRef}
-                  data={barData}
-                  options={barOptions}
-                />
-              )}
+              <Bar ref={barChartRef} data={barData} options={barOptions} />
             </div>
           </CardContent>
         </Card>
       </div>
- <TransactionAnalytics/>
+
+      {/* Extra analytics */}
+      <div id="transaction-analytics">
+        <TransactionAnalytics />
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -215,17 +266,10 @@ const Analytics = () => {
         ].map(([label, value], index) => (
           <Card key={index} className="p-4 text-center">
             <CardTitle>{label}</CardTitle>
-            <div className="text-3xl font-bold mt-2">
-              {isLoading ? (
-                <Skeleton className="h-8 w-20 mx-auto" />
-              ) : (
-                value
-              )}
-            </div>
+            <div className="text-3xl font-bold mt-2">{value}</div>
           </Card>
         ))}
       </div>
-     
     </div>
   );
 };

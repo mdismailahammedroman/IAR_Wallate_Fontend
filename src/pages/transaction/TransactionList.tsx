@@ -100,7 +100,7 @@ if (isLoading) {
       <h1 className="text-2xl font-bold mb-6 text-center">All Transactions</h1>
 
       {/* Filters */}
-     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-6">
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-6 filter-form">
 
         <Input
           placeholder="Search name/email/phone"

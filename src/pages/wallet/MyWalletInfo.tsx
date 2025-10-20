@@ -126,7 +126,7 @@ export function MyWalletInfo() {
   return (
     <div className="space-y-8">
       {/* Wallet Balance & Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid dashboard-stats  gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="col-span-1 mt-4">
           <CardHeader>
             <CardTitle>Wallet Balance</CardTitle>
