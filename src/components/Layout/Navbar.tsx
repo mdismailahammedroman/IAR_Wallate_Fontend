@@ -1,4 +1,4 @@
-import  { useMemo } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,11 @@ import { useAppDispatch } from "@/redux/hook";
 import { role } from "@/constants/roles";
 import ModeToggle from "./mode.toggle";
 
-// Original navigation links (public only)
+// ✅ Shepherd.js
+import Shepherd from "shepherd.js";
+import "shepherd.js/dist/css/shepherd.css";
+
+// Public navigation links
 const baseLinks = [
   { href: "/", label: "Home", role: "PUBLIC" },
   { href: "/about", label: "About", role: "PUBLIC" },
@@ -39,9 +43,7 @@ const roleDashboards = {
 export default function Navbar() {
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
-
-  const { data} = useUserInfoQuery(undefined);
-
+  const { data } = useUserInfoQuery(undefined);
 
   const userRole = data?.data?.role;
   const userEmail = data?.data?.email;
@@ -50,23 +52,59 @@ export default function Navbar() {
     await logout(undefined);
     localStorage.clear();
     dispatch(authApi.util.resetApiState());
-    
   };
 
+  // Filter links based on role
   const filteredLinks = useMemo(() => {
     const links = [...baseLinks];
-
     if (userRole && userRole in roleDashboards) {
-  links.push({
-    href: roleDashboards[userRole as keyof typeof roleDashboards],
-    label: "Dashboard",
-    role: userRole,
-  });
-}
-
-
+      links.push({
+        href: roleDashboards[userRole as keyof typeof roleDashboards],
+        label: "Dashboard",
+        role: userRole,
+      });
+    }
     return links;
   }, [userRole]);
+
+  // ✅ Shepherd tour steps
+  const startTour = () => {
+    const tour = new Shepherd.Tour({
+      defaultStepOptions: {
+        cancelIcon: { enabled: true },
+        classes: "shadow-md bg-indigo-600 text-white",
+        scrollTo: { behavior: "smooth", block: "center" },
+      },
+      useModalOverlay: true,
+    });
+
+    tour.addStep({
+      id: "mobile-menu",
+      text: "This is the mobile menu toggle!",
+      attachTo: {
+        element: ".mobile-menu-toggle",
+        on: "right",
+      },
+      buttons: [
+        { text: "Next", action: tour.next },
+      ],
+    });
+
+    tour.addStep({
+      id: "theme-toggle",
+      text: "Click here to switch between light and dark mode.",
+      attachTo: {
+        element: ".mode-toggle",
+        on: "left",
+      },
+      buttons: [
+        { text: "Back", action: tour.back },
+        { text: "Finish", action: tour.complete },
+      ],
+    });
+
+    tour.start();
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-700 text-white dark:text-gray-200 shadow-md">
@@ -76,7 +114,11 @@ export default function Navbar() {
           {/* Mobile menu */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button className="group size-8 md:hidden" variant="ghost" size="icon">
+              <Button
+                className="group size-8 md:hidden mobile-menu-toggle"
+                variant="ghost"
+                size="icon"
+              >
                 <svg
                   className="pointer-events-none"
                   width={16}
@@ -142,7 +184,19 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <ModeToggle />
+          {/* ✅ Add className for Shepherd targeting */}
+          <ModeToggle className="mode-toggle" />
+
+          {/* ✅ Show Start Tour button only when logged in */}
+          {userEmail && (
+            <Button
+              onClick={startTour}
+              variant="secondary"
+              className="text-sm"
+            >
+              Start Tour
+            </Button>
+          )}
 
           {userEmail ? (
             <Button
@@ -153,17 +207,15 @@ export default function Navbar() {
               Logout
             </Button>
           ) : (
-            <Button asChild className="text-sm">
-              <Link to="/auth/login">Login</Link>
-            </Button>
+            <>
+              <Button asChild className="text-sm">
+                <Link to="/auth/login">Login</Link>
+              </Button>
+              <Button asChild className="text-sm">
+                <Link to="/user/register">Sign Up</Link>
+              </Button>
+            </>
           )}
-
-          {/* Sign Up Role Selector */}
-          {!userEmail &&
-            <Button asChild className="text-sm">
-              <Link to="/user/register">sign up</Link>
-            </Button>
-          }
         </div>
       </div>
     </header>
