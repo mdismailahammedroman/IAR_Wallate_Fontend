@@ -6,58 +6,92 @@ import { UserUpdateForm } from "@/pages/user/UserUpdateForm";
 import { MyTransactionHistory } from "@/pages/wallet/MyTransactionHistory";
 import { MyWalletInfo } from "@/pages/wallet/MyWalletInfo";
 import type { ISidebarItem } from "@/types";
+import { 
+  User, 
+  Edit3, 
+  Key, 
+  ArrowDownToLine, 
+  ArrowUpFromLine, 
+  Wallet, 
+  History,
+  Home,
+  TrendingUp,
+  Shield
+} from "lucide-react";
 
 export const agentSidebarItems: ISidebarItem[] = [
   {
-    title: "Agent Personal Info",
+    title: "Agent Dashboard",
+    items: [
+      {
+        title: "Home",
+        url: "/user/home",
+        component: UserProfile,
+        icon: Home,
+      },
+      {
+        title: "Analytics",
+        url: "/user/analytics",
+        component: UserProfile,
+        icon: TrendingUp,
+      },
+    ],
+  },
+  {
+    title: "Agent Profile",
     items: [
       {
         title: "Profile",
         url: "/user/me",
         component: UserProfile,
+        icon: User,
       },
       {
         title: "Update Profile",
         url: "/user/update",
         component: UserUpdateForm,
+        icon: Edit3,
       },
-          {
-      title: "Change Password",
-      url: "/user/change-password",
-      component: ChangePasswordForm,
-    },
+      {
+        title: "Change Password",
+        url: "/user/change-password",
+        component: ChangePasswordForm,
+        icon: Key,
+      },
     ],
   },
   {
-    title: "Transactions",
+    title: "Agent Transactions",
     items: [
       {
         title: "Cash In",
         url: "/user/transactions/cash-in",
         component: TransactionPage,
+        icon: ArrowDownToLine,
       },
       {
         title: "Cash Out",
         url: "/user/transactions/cash-out",
         component: TransactionPage,
+        icon: ArrowUpFromLine,
       },
     ],
   },
-   {
-      title: "wallet Info",
-      items: [
-        {
-          title: "My Wallet",
-          url: "/user/wallets/me",
-          component: MyWalletInfo
-  
-        },
-        {
-          title: "My Transaction History",
-          url: "/user/transactions/me",
-          component: MyTransactionHistory
-  
-        },
-      ],
-    },
+  {
+    title: "Wallet Management",
+    items: [
+      {
+        title: "My Wallet",
+        url: "/user/wallets/me",
+        component: MyWalletInfo,
+        icon: Wallet,
+      },
+      {
+        title: "Transaction History",
+        url: "/user/transactions/me",
+        component: MyTransactionHistory,
+        icon: History,
+      },
+    ],
+  },
 ];

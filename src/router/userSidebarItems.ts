@@ -4,9 +4,37 @@ import { UserUpdateForm } from "@/pages/user/UserUpdateForm";
 import { MyTransactionHistory } from "@/pages/wallet/MyTransactionHistory";
 import { MyWalletInfo } from "@/pages/wallet/MyWalletInfo";
 import type { ISidebarItem } from "@/types";
-
+import { 
+  User, 
+  Edit3, 
+  Send, 
+  Plus, 
+  Minus, 
+  Wallet, 
+  History,
+  Home,
+  CreditCard,
+  TrendingUp
+} from "lucide-react";
 
 export const userSidebarItems: ISidebarItem[] = [
+  {
+    title: "Dashboard",
+    items: [
+      {
+        title: "Home",
+        url: "/user/home",
+        component: UserProfile,
+        icon: Home,
+      },
+      {
+        title: "Analytics",
+        url: "/user/analytics",
+        component: UserProfile,
+        icon: TrendingUp,
+      },
+    ],
+  },
   {
     title: "Personal Info",
     items: [
@@ -14,11 +42,13 @@ export const userSidebarItems: ISidebarItem[] = [
         title: "Profile",
         url: "/user/me",
         component: UserProfile,
+        icon: User,
       },
       {
         title: "Update Profile",
         url: "/user/update",
         component: UserUpdateForm,
+        icon: Edit3,
       },
     ],
   },
@@ -28,35 +58,37 @@ export const userSidebarItems: ISidebarItem[] = [
       {
         title: "Send Money",
         url: "/user/send-money",
-        component: TransactionPage
-
+        component: TransactionPage,
+        icon: Send,
       },
       {
         title: "Add Money",
         url: "/user/add-money",
-       component: TransactionPage
+        component: TransactionPage,
+        icon: Plus,
       },
       {
         title: "Withdraw Money",
         url: "/user/withdraw-money",
-       component: TransactionPage
+        component: TransactionPage,
+        icon: Minus,
       },
     ],
   },
   {
-    title: "wallet Info",
+    title: "Wallet Info",
     items: [
       {
         title: "My Wallet",
         url: "/user/wallets/me",
-        component: MyWalletInfo
-
+        component: MyWalletInfo,
+        icon: Wallet,
       },
       {
-        title: "My Transaction History",
+        title: "Transaction History",
         url: "/user/transactions/me",
-        component: MyTransactionHistory
-
+        component: MyTransactionHistory,
+        icon: History,
       },
     ],
   },

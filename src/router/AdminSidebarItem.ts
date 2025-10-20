@@ -5,44 +5,79 @@ import AgentManagement from "@/pages/user/AgentManagement";
 import UserManagement from "@/pages/user/UserManagement";
 import { UserProfile } from "@/pages/user/UserProfile";
 import type { ISidebarItem } from "@/types";
-
+import { 
+  BarChart3, 
+  Users, 
+  UserCheck, 
+  List, 
+  Wallet, 
+  Settings,
+  TrendingUp,
+  Shield
+} from "lucide-react";
 
 export const adminSidebarItems: ISidebarItem[] = [
   {
-    title: "admin",
+    title: "Dashboard",
     items: [
-   
       {
-        title: "Dashbord",
+        title: "Analytics",
         url: "analytics",
         component: Analytics,
+        icon: BarChart3,
       },
       {
-        title: "Manage User",
-        url: "manageuser",
-        component: UserManagement,
-      },
-      {
-        title: "Manage Agent",
-        url: "manageagent",
-        component: AgentManagement,
-      },
-      {
-        title: "Transaction list",
-        url: "transction",
-        component: TransactionList,
+        title: "Overview",
+        url: "overview",
+        component: Analytics,
+        icon: TrendingUp,
       },
     ],
   },
   {
-    title: "Profile",
+    title: "User Management",
+    items: [
+      {
+        title: "Manage Users",
+        url: "manageuser",
+        component: UserManagement,
+        icon: Users,
+      },
+      {
+        title: "Manage Agents",
+        url: "manageagent",
+        component: AgentManagement,
+        icon: UserCheck,
+      },
+    ],
+  },
+  {
+    title: "Transactions",
+    items: [
+      {
+        title: "All Transactions",
+        url: "transction",
+        component: TransactionList,
+        icon: List,
+      },
+    ],
+  },
+  {
+    title: "Profile & Settings",
     items: [
       {
         title: "My Wallet",
         url: "me",
         component: UserProfile,
+        icon: Wallet,
       },
-    
+      {
+        title: "Settings",
+        url: "settings",
+        component: UserProfile,
+        icon: Settings,
+      },
     ],
   },
 ];
+

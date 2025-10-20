@@ -8,15 +8,17 @@ import { ThemeProvider } from './Providers/theme.provider.tsx'
 import { Provider as ReduxProvider } from 'react-redux'
 import { store } from './redux/store.ts'
 import { Toaster } from './components/ui/sonner.tsx'
+import { TourProvider } from './components/Tour/TourProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ReduxProvider store={store} >
-
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <RouterProvider router={router} />
-      <Toaster/>
-    </ThemeProvider>
+      <TourProvider>
+        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+          <RouterProvider router={router} />
+          <Toaster/>
+        </ThemeProvider>
+      </TourProvider>
     </ReduxProvider>
   </StrictMode>,
 )

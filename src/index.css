@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import 'shepherd.js/dist/css/shepherd.css';
+@import './styles/tours.css';
 
 .shepherd-element {
   max-width: 200px;
