@@ -383,3 +383,5 @@ describe('Tour System', () => {
 ---
 
 This tour system provides a comprehensive, user-friendly way to guide new users through the IAR Wallet application, ensuring they can effectively use all features regardless of their role or technical expertise.
+
+

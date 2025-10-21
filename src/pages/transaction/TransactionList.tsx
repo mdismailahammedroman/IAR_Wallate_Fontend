@@ -206,7 +206,8 @@ if (isLoading) {
       {isLoading ? (
         <div className="overflow-x-auto rounded-md border mb-4">
           <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-100">
+         <thead className="bg-gray-100 dark:bg-gray-600 dark:text-black">
+
               <tr>
                 <th className="p-3">Date</th>
                 <th className="p-3">User</th>
@@ -235,7 +236,8 @@ if (isLoading) {
         <>
           <div className="overflow-x-auto rounded-md border mb-4">
             <table className="min-w-full text-sm text-left">
-              <thead className="bg-gray-100">
+            <thead className="bg-gray-100 dark:bg-gray-600 dark:text-black">
+
                 <tr>
                   <th className="p-3">Date</th>
                   <th className="p-3">User</th>
@@ -247,7 +249,7 @@ if (isLoading) {
               </thead>
               <tbody>
                 {transactions.map((tx: any) => (
-                  <tr key={tx._id} className="border-t hover:bg-gray-50">
+                  <tr key={tx._id} className="border-t hover:bg-gray-300 hover:text-gray-800">
                     <td className="p-3">{format(new Date(tx.createdAt), "dd MMM yyyy")}</td>
                     <td className="p-3">
                       {tx.initiatedByUser?.name || tx.initiatedByAgent?.name || "N/A"}

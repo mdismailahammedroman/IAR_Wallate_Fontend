@@ -48,76 +48,84 @@ export function MyWalletInfo() {
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const transactions = txnResp?.data?.transactions || [];
+  console.log(transactions);
+  
 
   const role = userData?.data?.role;
   const isUser = role === "USER";
   const isAgent = role === "AGENT";
 
   // Calculate totals for chart and summary
-  const {
-    totalAgentCashIn,
-    totalAgentCashOut,
-    totalUserSend,
-    totalUserAdd,
-    totalUserWithdraw,
-  } = useMemo(() => {
-    let agentCashIn = 0;
-    let agentCashOut = 0;
-    let userSend = 0;
-    let userAdd = 0;
-    let userWithdraw = 0;
+ const {
+  totalAgentCashIn,
+  totalAgentCashOut,
+  totalUserSend,
+  totalUserAdd,
+  totalUserWithdraw,
+} = useMemo(() => {
+  let agentCashIn = 0;
+  let agentCashOut = 0;
+  let userSend = 0;
+  let userAdd = 0;
+  let userWithdraw = 0;
 
-    transactions.forEach((t) => {
-      const byAgent = !!t.initiatedByAgent;
+  transactions.forEach((t) => {
+    const byAgent = !!t.fromAgent; // Use `fromAgent` for agent transactions
 
-      if (t.transactionType === "CASH_IN" && byAgent) {
-        agentCashIn += t.amount;
-      } else if (t.transactionType === "CASH_OUT" && byAgent) {
-        agentCashOut += t.amount;
-      } else if (t.transactionType === "SEND" && !byAgent) {
-        userSend += t.amount;
-      } else if (t.transactionType === "ADD" && !byAgent) {
-        userAdd += t.amount;
-      } else if (t.transactionType === "WITHDRAW" && !byAgent) {
-        userWithdraw += t.amount;
-      }
-    });
+    if (t.transactionType === "CASH_IN" && byAgent) {
+      agentCashIn += t.amount;
+    } else if (t.transactionType === "CASH_OUT" && byAgent) {
+      agentCashOut += t.amount;
+    } else if (t.transactionType === "SEND" && !byAgent) {
+      userSend += t.amount;
+    } else if (t.transactionType === "ADD" && !byAgent) {
+      userAdd += t.amount;
+    } else if (t.transactionType === "WITHDRAW" && !byAgent) {
+      userWithdraw += t.amount;
+    }
+  });
 
-    return {
-      totalAgentCashIn: agentCashIn,
-      totalAgentCashOut: agentCashOut,
-      totalUserSend: userSend,
-      totalUserAdd: userAdd,
-      totalUserWithdraw: userWithdraw,
-    };
-  }, [transactions]);
+  return {
+    totalAgentCashIn: agentCashIn,
+    totalAgentCashOut: agentCashOut,
+    totalUserSend: userSend,
+    totalUserAdd: userAdd,
+    totalUserWithdraw: userWithdraw,
+  };
+}, [transactions]);
 
-  // Pie chart data based on role
+
   const chartData = useMemo(() => {
-    if (isUser) {
-      return [
-        { name: "Send", value: totalUserSend },
-        { name: "Add", value: totalUserAdd },
-        { name: "Withdraw", value: totalUserWithdraw },
-      ];
-    }
-    if (isAgent) {
-      return [
-        { name: "Cash In", value: totalAgentCashIn },
-        { name: "Cash Out", value: totalAgentCashOut },
-      ];
-    }
-    return [];
-  }, [
-    isUser,
-    isAgent,
-    totalAgentCashIn,
-    totalAgentCashOut,
-    totalUserSend,
-    totalUserAdd,
-    totalUserWithdraw,
-  ]);
+  if (isUser) {
+    return [
+      { name: "Send", value: totalUserSend },
+      { name: "Add", value: totalUserAdd },
+      { name: "Withdraw", value: totalUserWithdraw },
+    ];
+  }
+  if (isAgent) {
+    return [
+      { name: "Cash In", value: totalAgentCashIn },
+      { name: "Cash Out", value: totalAgentCashOut },
+    ];
+  }
 
+  // For others (if needed)
+  return [
+    { name: "Cash In", value: totalAgentCashIn },
+    { name: "Cash Out", value: totalAgentCashOut },
+  ];
+}, [
+  isUser,
+  isAgent,
+  totalAgentCashIn,
+  totalAgentCashOut,
+  totalUserSend,
+  totalUserAdd,
+  totalUserWithdraw,
+]);
+
+console.log(chartData);
   const COLORS = ["#4ade80", "#730bdb", "#3b82f6", "#fbbf24"]; // green, red, blue, yellow
 
   // Format balance (fallback to 0)

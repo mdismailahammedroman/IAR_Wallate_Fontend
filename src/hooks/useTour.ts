@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useMemo } from 'react';
 import { useTour as useTourContext } from '@/components/Tour/TourProvider';
 import { 

@@ -131,6 +131,11 @@ export const Role = {
 export type Role = (typeof Role)[keyof typeof Role];
 
 export interface OverviewResponse {
+  
+  totalApprovedAgents?: number;
+  totalPendingAgents?: number;
+  totalBlockedUsers?: number;
+  totalWalletBalance?: number; 
   totalUsers: number;
   totalAgents: number;
   transactionCount: number;
