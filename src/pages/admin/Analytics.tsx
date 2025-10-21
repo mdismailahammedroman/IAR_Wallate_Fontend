@@ -4,16 +4,13 @@ import { Button } from "@/components/ui/button";
 import {
   TrendingUp,
   Users,
-  DollarSign,
   Activity,
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
   RefreshCw,
 } from "lucide-react";
-import { useGetOverviewQuery } from "@/redux/features/auth/auth.api";
 import { useGetAllTransactionsQuery } from "@/redux/features/transaction/transaction.api";
-import { useMyWalletQuery } from "@/redux/features/wallet/wallet.api";
 
 // Recharts for the revenue chart
 import {
@@ -24,21 +21,24 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
+  Pie,
+  Legend,
+  PieChart,
+  Cell,
 } from "recharts";
+import { useGetOverviewQuery } from "@/redux/features/auth/auth.api";
 
 export default function Analytics() {
   const { data: overviewData, refetch: refetchOverview } = useGetOverviewQuery();
   const { data: transactionData, refetch: refetchTransactions } = useGetAllTransactionsQuery({ page: 1, limit: 50 });
-  const { data: walletData, refetch: refetchWallet } = useMyWalletQuery();
+
 
   const handleRefresh = () => {
     refetchOverview();
     refetchTransactions();
-    refetchWallet();
   };
 
   const overview = overviewData?.data;
-  const wallet = walletData?.data;
   const recentTransactionsData = transactionData?.data || [];
 
   // ==============================
@@ -130,42 +130,58 @@ export default function Analytics() {
   // 🧾 Dashboard Stats Cards
   // ===================================
   const stats = [
-  {
-    title: "Total Users",
-    value: overview?.totalUsers ?? "0",
-    change: "+8.2%",
-    trend: "up",
-    icon: Users,
-    description: "Registered users",
-  },
-  {
-    title: "Total Agents",
-    value: overview?.totalAgents ?? "0",
-    change: "+5.4%",
-    trend: "up",
-    icon: Activity,
-    description: "Approved agents",
-  },
-  {
-    title: "System Wallet Balance",
-    value: `$${overview?.totalWalletBalance?.toLocaleString() ?? "0"}`,
-    change: "+3.1%",
-    trend: "up",
-    icon: Wallet,
-    description: "Combined user wallet balance",
-  },
-  {
-    title: "Your Wallet Balance",
-    value: `$${wallet?.balance?.toLocaleString() ?? "0"}`,
-    change: "-2.4%",
-    trend: "down",
-    icon: DollarSign,
-    description: "Personal wallet balance",
-  },
-];
+    {
+      title: "Total Users",
+      value: overview?.totalUsers ?? "0",
+      change: "+8.2%",
+      trend: "up",
+      icon: Users,
+      description: "Registered users",
+    },
+    {
+      title: "Total Agents",
+      value: overview?.totalAgents ?? "0",
+      change: "+5.4%",
+      trend: "up",
+      icon: Activity,
+      description: "Approved agents",
+    },
+    {
+      title: "System Wallet Balance",
+      value: `$${(overview?.totalWalletBalance ?? 12345).toLocaleString()}`,
 
-console.log("📊 Overview Data:", overviewData);
-console.log("👛 Wallet Data:", walletData);
+      change: "+3.1%",
+      trend: "up",
+      icon: Wallet,
+      description: "Combined user wallet balance",
+    },
+
+  ];
+
+
+  const transactionTypeSummary = (() => {
+    const summary: Record<string, number> = {};
+
+    (recentTransactionsData || []).forEach((tx) => {
+      const type = tx.transactionType?.replace("_", " ") || "Unknown";
+      summary[type] = (summary[type] || 0) + 1;
+    });
+
+    const colors: Record<string, string> = {
+      Send: "#4f46e5",
+      Add: "#10b981",
+      Withdraw: "#ef4444",
+      "Cash In": "#f59e0b",
+      "Cash Out": "#3b82f6",
+      Unknown: "#9ca3af",
+    };
+
+    return Object.entries(summary).map(([type, value]) => ({
+      type,
+      value,
+      color: colors[type] || "#6b7280",
+    }));
+  })();
 
   return (
     <div className="space-y-6 dashboard-analytics">
@@ -184,13 +200,13 @@ console.log("👛 Wallet Data:", walletData);
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 dashboard-stats">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 dashboard-stats">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           const isPositive = stat.trend === "up";
 
           return (
-            <Card key={index} className="hover:shadow-md transition-shadow">
+            <Card key={index} className="hover:shadow-md transition-shadow ">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                 <Icon className="h-4 w-4 text-muted-foreground" />
@@ -215,9 +231,9 @@ console.log("👛 Wallet Data:", walletData);
       </div>
 
       {/* Chart + Recent Transactions */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6 ">
         {/* Revenue Chart */}
-        <Card className="col-span-4 dashboard-chart">
+        <Card className="col-span-3 dashboard-chart">
           <CardHeader>
             <CardTitle>Revenue Overview</CardTitle>
             <CardDescription>Monthly revenue trends for the past 6 months</CardDescription>
@@ -250,26 +266,104 @@ console.log("👛 Wallet Data:", walletData);
             </div>
           </CardContent>
         </Card>
-
-        {/* Recent Transactions */}
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Latest wallet transactions across the system</CardDescription>
+            <CardTitle>Transaction Type Breakdown</CardTitle>
+            <CardDescription>Distribution of Send, Add, Withdraw, Cash In, Cash Out</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={transactionTypeSummary}
+                    dataKey="value"
+                    nameKey="type"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label={(entry) => `${entry.type} (${entry.value})`}
+                  >
+                    {transactionTypeSummary.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+      </div>
+
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
+        {/* Top Users */}
+        <Card className="col-span-6 md:col-span-2 lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Top Users</CardTitle>
+            <CardDescription>Users with the highest wallet balances</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {topUsers.map((user, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                      <span className="text-indigo-600 font-bold text-sm">
+                        {user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium">{user.name}</p>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-lg">
+                      ${user.balance.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {user.transactions} transactions
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Transactions */}
+        <Card className="col-span-6 md:col-span-2 lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Transactions</CardTitle>
+            <CardDescription>
+              Latest wallet transactions across the system
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between p-3 dark:bg-gray-800 bg-gray-100 rounded-lg"
+                >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        transaction.status === "Completed"
+                      className={`w-2 h-2 rounded-full ${transaction.status === "Completed"
                           ? "bg-green-500"
                           : transaction.status === "Pending"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                      }`}
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
                     />
                     <div>
                       <p className="font-medium text-sm">{transaction.user}</p>
@@ -279,7 +373,11 @@ console.log("👛 Wallet Data:", walletData);
                   <div className="text-right">
                     <p className="font-bold text-sm">{transaction.amount}</p>
                     <Badge
-                      variant={transaction.status === "Completed" ? "default" : "secondary"}
+                      variant={
+                        transaction.status === "Completed"
+                          ? "default"
+                          : "secondary"
+                      }
                       className="text-xs"
                     >
                       {transaction.status}
@@ -293,35 +391,7 @@ console.log("👛 Wallet Data:", walletData);
       </div>
 
       {/* Top Users */}
-      <Card className="dashboard-top-users">
-        <CardHeader>
-          <CardTitle>Top Users by Balance</CardTitle>
-          <CardDescription>Users with the highest wallet balances</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {topUsers.map((user, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <span className="text-indigo-600 font-bold text-sm">
-                      {user.name.split(" ").map((n) => n[0]).join("")}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-lg">${user.balance.toLocaleString()}</p>
-                  <p className="text-sm text-gray-500">{user.transactions} transactions</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Quick Actions */}
       <Card className="dashboard-quick-actions">
