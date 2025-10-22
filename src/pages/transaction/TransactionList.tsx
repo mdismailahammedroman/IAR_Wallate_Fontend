@@ -87,7 +87,7 @@ const TransactionList = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setPage(1);
   };
-  console.log("Query Filters:", queryFilters);
+  console.log("Query Filters:", response);
 if (isLoading) {
     return    <div className="flex items-center justify-center h-screen">
             <Spinner className="size-8" />

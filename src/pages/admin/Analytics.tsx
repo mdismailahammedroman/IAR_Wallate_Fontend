@@ -27,6 +27,7 @@ import {
   Cell,
 } from "recharts";
 import { useGetOverviewQuery } from "@/redux/features/auth/auth.api";
+import { Link } from "react-router";
 
 export default function Analytics() {
   const { data: overviewData, refetch: refetchOverview } = useGetOverviewQuery();
@@ -207,7 +208,7 @@ export default function Analytics() {
 
           return (
             <Card key={index} className="hover:shadow-md transition-shadow ">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                 <Icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -401,18 +402,18 @@ export default function Analytics() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+            <Link to={"/admin/manageuser"}  className="h-20 flex flex-col items-center justify-center gap-2 border-2 rounded-xl">
               <Users className="w-6 h-6" />
               <span>Manage Users</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+            </Link>
+            <Link to={"/admin/transction"}  className="h-20 flex flex-col items-center justify-center gap-2 border-2 rounded-xl">
               <Activity className="w-6 h-6" />
               <span>View Transactions</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+            </Link>
+            <Link to={"/admin/manageagent"}  className="h-20 flex flex-col items-center justify-center gap-2 border-2 rounded-xl">
               <TrendingUp className="w-6 h-6" />
-              <span>Generate Report</span>
-            </Button>
+              <span>Manage Agents</span>
+            </Link>
           </div>
         </CardContent>
       </Card>

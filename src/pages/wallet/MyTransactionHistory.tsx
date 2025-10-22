@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
 import { useMyTransactionsQuery } from "@/redux/features/wallet/wallet.api";
+import { useGetAgentTransactionsQuery } from "@/redux/features/transaction/transaction.api";
+import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import {
   Card,
   CardHeader,
@@ -25,37 +28,66 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 
 export const MyTransactionHistory = () => {
-  const [limit] = useState(10);
+  const [limit] = useState(100);
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const { data, isLoading, refetch } = useMyTransactionsQuery({
-    limit,
-    page,
-    type,
-    startDate,
-    endDate,
-  });
+  // Detect role
+  const { data: userInfo } = useUserInfoQuery(undefined);
+  const role = userInfo?.data?.role;
+  const isAgent = role === "AGENT";
 
-  const transactions = data?.data?.transactions || [];
+  // Call both hooks with skip flags to preserve hook order
+  const userQuery = useMyTransactionsQuery(
+    { limit, page, type, startDate, endDate },
+    { skip: isAgent }
+  );
+  const agentQuery = useGetAgentTransactionsQuery(
+    { limit, page, type, startDate, endDate },
+    { skip: !isAgent }
+  );
+
+  const selected = isAgent ? agentQuery : userQuery;
+  const { data, isLoading, refetch, error } = selected;
+
+  // Normalize response: agents may return an array; users return { transactions: [] }
+  const selectedRaw = data?.data as any;
+  const transactions = Array.isArray(selectedRaw)
+    ? selectedRaw
+    : (selectedRaw?.transactions || []);
 
   const handleFilter = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
     refetch();
   };
-  if (isLoading) {
-    return    <div className="flex items-center justify-center h-screen">
-            <Spinner className="size-8" />
 
-    </div>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner className="size-8" />
+      </div>
+    );
   }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Failed to load transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => refetch()}>Try Again</Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -102,65 +134,62 @@ export const MyTransactionHistory = () => {
           </Button>
         </form>
 
-        {/* ✅ Table or Skeleton */}
+        {/* ✅ Transaction Table */}
         <div className="overflow-x-auto">
-          {isLoading ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[...Array(5)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.length > 0 ? (
-                  transactions.map((txn) => (
-                    <TableRow key={txn._id}>
-                      <TableCell>{txn.transactionType}</TableCell>
-                      <TableCell>{txn.amount}</TableCell>
-                      <TableCell>{txn.fromUser?.name || "-"}</TableCell>
-                      <TableCell>{txn.toUser?.name || "-"}</TableCell>
-                      <TableCell>
-                        {new Date(txn.createdAt).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center">
-                      No transactions found.
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Type</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>To</TableHead>
+                <TableHead>Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.length > 0 ? (
+                transactions.map((txn: any) => (
+                  <TableRow key={txn._id}>
+                    <TableCell>{txn.transactionType}</TableCell>
+                    <TableCell>{txn.amount}</TableCell>
+                    <TableCell>
+                      {txn.fromUser?.name ||
+                        txn.fromAgent?.name ||
+                        txn.initiatedByUser?.name ||
+                        txn.initiatedByAgent?.name ||
+                        // Fallbacks when API returns plain IDs instead of populated objects
+                        (typeof txn.fromUser === "string" ? txn.fromUser : undefined) ||
+                        (typeof txn.fromAgent === "string" ? txn.fromAgent : undefined) ||
+                        (typeof txn.initiatedByUser === "string" ? txn.initiatedByUser : undefined) ||
+                        (typeof txn.initiatedByAgent === "string" ? txn.initiatedByAgent : undefined) ||
+                        "-"}
+                    </TableCell>
+                    <TableCell>
+                      {txn.toUser?.name ||
+                        txn.toAgent?.name ||
+                        txn.initiatedByUser?.name ||
+                        txn.initiatedByAgent?.name ||
+                        // Fallbacks when API returns plain IDs instead of populated objects
+                        (typeof txn.toUser === "string" ? txn.toUser : undefined) ||
+                        (typeof txn.toAgent === "string" ? txn.toAgent : undefined) ||
+                        (typeof txn.initiatedByUser === "string" ? txn.initiatedByUser : undefined) ||
+                        (typeof txn.initiatedByAgent === "string" ? txn.initiatedByAgent : undefined) ||
+                        "-"}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(txn.createdAt).toLocaleString()}
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    No transactions found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>

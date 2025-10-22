@@ -4,6 +4,7 @@ import TransactionList from "@/pages/transaction/TransactionList";
 import AgentManagement from "@/pages/user/AgentManagement";
 import UserManagement from "@/pages/user/UserManagement";
 import { UserProfile } from "@/pages/user/UserProfile";
+import { UserUpdateForm } from "@/pages/user/UserUpdateForm";
 import type { ISidebarItem } from "@/types";
 import { 
   BarChart3, 
@@ -12,8 +13,6 @@ import {
   List, 
   Wallet, 
   Settings,
-  TrendingUp,
-  Shield
 } from "lucide-react";
 
 export const adminSidebarItems: ISidebarItem[] = [
@@ -25,13 +24,7 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "analytics",
         component: Analytics,
         icon: BarChart3,
-      },
-      {
-        title: "Overview",
-        url: "overview",
-        component: Analytics,
-        icon: TrendingUp,
-      },
+      }
     ],
   },
   {
@@ -74,7 +67,7 @@ export const adminSidebarItems: ISidebarItem[] = [
       {
         title: "Settings",
         url: "settings",
-        component: UserProfile,
+        component: UserUpdateForm,
         icon: Settings,
       },
     ],

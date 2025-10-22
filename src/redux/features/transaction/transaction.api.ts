@@ -11,6 +11,7 @@ import type {
   IWithdrawPayload,
   ITransaction,
   IPaginatedResponse,
+  ITransactionListResponse,
 } from "@/types/transaction.types";
 
 export const transactionApi = baseApi.injectEndpoints({
@@ -76,6 +77,59 @@ export const transactionApi = baseApi.injectEndpoints({
         params,
       }),
     }),
+   
+    
+    // 👇 GET for User Transactions
+    getUserTransactions: builder.query<
+      IResponse<ITransactionListResponse>,
+      {
+        limit: number;
+        page: number;
+        type?: string;
+        startDate?: string;
+        endDate?: string;
+      }
+    >({
+      query: ({ limit, page, type, startDate, endDate }) => {
+        const params = new URLSearchParams();
+        params.append("limit", limit.toString());
+        params.append("page", page.toString());
+        if (type) params.append("type", type);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
+
+        return {
+          url: `/transactions/user-transaction?${params.toString()}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    // 👇 GET for Agent Transactions
+    getAgentTransactions: builder.query<
+      IResponse<ITransactionListResponse>,
+      {
+        limit: number;
+        page: number;
+        type?: string;
+        startDate?: string;
+        endDate?: string;
+      }
+    >({
+      query: ({ limit, page, type, startDate, endDate }) => {
+        const params = new URLSearchParams();
+        params.append("limit", limit.toString());
+        params.append("page", page.toString());
+        if (type) params.append("type", type);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
+
+        return {
+          url: `/transactions/agent-transaction?${params.toString()}`,
+          method: "GET",
+        };
+      },
+    }),
   }),
 });
 
@@ -86,4 +140,6 @@ export const {
   useCashInMutation,
   useCashOutMutation,
   useGetAllTransactionsQuery,
+  useGetAgentTransactionsQuery,
+  useGetUserTransactionsQuery,
 } = transactionApi;

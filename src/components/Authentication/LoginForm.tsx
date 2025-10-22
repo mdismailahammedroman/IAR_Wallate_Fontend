@@ -47,6 +47,9 @@ const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
   if (role === "USER") {
     navigate("/user/dashboard"); 
     
+  } else if (role === "AGENT") {
+    navigate("/user/dashboard"); // Agents use the same dashboard as users but with different sidebar items
+    
   } else if (role === "ADMIN" || role === "SUPER_ADMIN") {
     navigate("/admin/dashboard");
   } else {

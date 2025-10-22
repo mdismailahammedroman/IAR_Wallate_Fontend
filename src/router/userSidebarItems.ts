@@ -13,8 +13,6 @@ import {
   Wallet, 
   History,
   Home,
-  CreditCard,
-  TrendingUp
 } from "lucide-react";
 
 export const userSidebarItems: ISidebarItem[] = [
@@ -26,13 +24,7 @@ export const userSidebarItems: ISidebarItem[] = [
         url: "/user/home",
         component: UserProfile,
         icon: Home,
-      },
-      {
-        title: "Analytics",
-        url: "/user/analytics",
-        component: UserProfile,
-        icon: TrendingUp,
-      },
+      }
     ],
   },
   {

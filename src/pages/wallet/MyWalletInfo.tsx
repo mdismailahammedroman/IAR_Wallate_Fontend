@@ -15,9 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMyTransactionsQuery, useMyWalletQuery } from "@/redux/features/wallet/wallet.api";
-import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
-
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   PieChart,
   Pie,
@@ -26,37 +24,60 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Skeleton } from "@/components/ui/skeleton";
+
+import {
+  useMyTransactionsQuery,
+  useMyWalletQuery,
+} from "@/redux/features/wallet/wallet.api";
+import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import {
+  useGetAgentTransactionsQuery
+} from "@/redux/features/transaction/transaction.api";
 
 export function MyWalletInfo() {
   const navigate = useNavigate();
 
   // Fetch wallet & balance
-  const { data: walletResp, isLoading: loadingWallet } =  useMyWalletQuery(undefined, {
-  refetchOnMountOrArgChange: true,
-});
+  const { data: walletResp, isLoading: loadingWallet } = useMyWalletQuery(
+    undefined,
+    { refetchOnMountOrArgChange: true }
+  );
   const walletData = walletResp?.data;
 
-  // Fetch user info (to get role)
+  // Fetch user info (role)
   const { data: userData } = useUserInfoQuery(undefined);
-
-  // Fetch recent transactions (e.g. limit = 5, page = 1)
-  const { data: txnResp, isLoading: loadingTxns } = useMyTransactionsQuery({
-    limit: 5,
-    page: 1,
-  });
-  
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const transactions = txnResp?.data?.transactions || [];
-  console.log(transactions);
-  
-
   const role = userData?.data?.role;
   const isUser = role === "USER";
   const isAgent = role === "AGENT";
 
-  // Calculate totals for chart and summary
- const {
+  // Always call both hooks, but use the appropriate one based on role
+  const userQuery = useMyTransactionsQuery({
+    limit: 5,
+    page: 1,
+  }, { skip: isAgent });
+
+  const agentQuery = useGetAgentTransactionsQuery({
+    limit: 5,
+    page: 1,
+  }, { skip: !isAgent });
+
+  // Use the appropriate query result based on role
+  const { data: txnResp, isLoading: loadingTxns } = isAgent ? agentQuery : userQuery;
+  
+  const transactions = useMemo(() => {
+    return txnResp?.data?.transactions || [];
+  }, [txnResp?.data?.transactions]);
+
+  // Debug logging
+  console.log("🔍 MyWalletInfo Debug:");
+  console.log("Role:", role);
+  console.log("Is Agent:", isAgent);
+  console.log("User Query Data:", userQuery.data);
+  console.log("Agent Query Data:", agentQuery.data);
+  console.log("Selected Query Data:", txnResp);
+  console.log("Transactions:", transactions);
+
+  const {
   totalAgentCashIn,
   totalAgentCashOut,
   totalUserSend,
@@ -70,18 +91,23 @@ export function MyWalletInfo() {
   let userWithdraw = 0;
 
   transactions.forEach((t) => {
-    const byAgent = !!t.fromAgent; // Use `fromAgent` for agent transactions
+    const type = (t.transactionType || "").toUpperCase();
+    const amount = Number(t.amount) || 0;
 
-    if (t.transactionType === "CASH_IN" && byAgent) {
-      agentCashIn += t.amount;
-    } else if (t.transactionType === "CASH_OUT" && byAgent) {
-      agentCashOut += t.amount;
-    } else if (t.transactionType === "SEND" && !byAgent) {
-      userSend += t.amount;
-    } else if (t.transactionType === "ADD" && !byAgent) {
-      userAdd += t.amount;
-    } else if (t.transactionType === "WITHDRAW" && !byAgent) {
-      userWithdraw += t.amount;
+    const isAgentTxn = !!t.initiatedByAgent || t.fromUser?.role === "AGENT" || t.toUser?.role === "AGENT";
+    const isUserTxn = !!t.initiatedByUser || t.fromUser?.role === "USER" || t.toUser?.role === "USER";
+
+    // Agent perspective
+    if (isAgentTxn) {
+      if (type === "CASH_IN") agentCashIn += amount;
+      else if (type === "CASH_OUT") agentCashOut += amount;
+    }
+
+    // User perspective
+    if (isUserTxn) {
+      if (type === "SEND") userSend += amount;
+      else if (type === "ADD" || type === "CASH_IN") userAdd += amount;
+      else if (type === "WITHDRAW" || type === "CASH_OUT") userWithdraw += amount;
     }
   });
 
@@ -95,46 +121,58 @@ export function MyWalletInfo() {
 }, [transactions]);
 
 
+console.log("Transactions:", transactions);
+console.log("AgentCashIn:", totalAgentCashIn);
+console.log("AgentCashOut:", totalAgentCashOut);
+console.log("UserAdd:", totalUserAdd);
+console.log("UserWithdraw:", totalUserWithdraw);
+
+  // Chart data
   const chartData = useMemo(() => {
-  if (isUser) {
-    return [
-      { name: "Send", value: totalUserSend },
-      { name: "Add", value: totalUserAdd },
-      { name: "Withdraw", value: totalUserWithdraw },
-    ];
-  }
-  if (isAgent) {
+    if (isUser) {
+      return [
+        { name: "Send", value: totalUserSend },
+        { name: "Add", value: totalUserAdd },
+        { name: "Withdraw", value: totalUserWithdraw },
+      ];
+    }
+    if (isAgent) {
+      return [
+        { name: "Cash In", value: totalAgentCashIn },
+        { name: "Cash Out", value: totalAgentCashOut },
+      ];
+    }
     return [
       { name: "Cash In", value: totalAgentCashIn },
       { name: "Cash Out", value: totalAgentCashOut },
     ];
-  }
+  }, [
+    isUser,
+    isAgent,
+    totalAgentCashIn,
+    totalAgentCashOut,
+    totalUserSend,
+    totalUserAdd,
+    totalUserWithdraw,
+  ]);
 
-  // For others (if needed)
-  return [
-    { name: "Cash In", value: totalAgentCashIn },
-    { name: "Cash Out", value: totalAgentCashOut },
-  ];
-}, [
-  isUser,
-  isAgent,
-  totalAgentCashIn,
-  totalAgentCashOut,
-  totalUserSend,
-  totalUserAdd,
-  totalUserWithdraw,
-]);
+  // Chart colors
+  const COLORS = {
+    Send: "#3b82f6",      // blue
+    Add: "#4ade80",       // green
+    Withdraw: "#fbbf24",  // yellow
+    "Cash In": "#22c55e", // green
+    "Cash Out": "#fbbf24" // red
+  };
 
-console.log(chartData);
-  const COLORS = ["#4ade80", "#730bdb", "#3b82f6", "#fbbf24"]; // green, red, blue, yellow
 
-  // Format balance (fallback to 0)
   const balance = walletData?.balance ?? 0;
 
   return (
     <div className="space-y-8">
       {/* Wallet Balance & Quick Actions */}
-      <div className="grid dashboard-stats  gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid dashboard-stats gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Wallet Balance */}
         <Card className="col-span-1 mt-4">
           <CardHeader>
             <CardTitle>Wallet Balance</CardTitle>
@@ -147,10 +185,10 @@ console.log(chartData);
                 ৳ {balance.toLocaleString()}
               </p>
             )}
-
           </CardContent>
         </Card>
 
+        {/* Quick Actions */}
         <Card className="col-span-1 mt-4">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
@@ -172,17 +210,16 @@ console.log(chartData);
                 </Button>
               </>
             )}
-
             {isAgent && (
               <>
                 <Button
-                  onClick={() => navigate("/agent/transactions/cash-in")}
+                  onClick={() => navigate("/user/transactions/cash-in")}
                   className="w-[140px]"
                 >
                   Cash In
                 </Button>
                 <Button
-                  onClick={() => navigate("/agent/transactions/cash-out")}
+                  onClick={() => navigate("/user/transactions/cash-out")}
                   className="w-[140px]"
                 >
                   Cash Out
@@ -192,7 +229,7 @@ console.log(chartData);
           </CardContent>
         </Card>
 
-        {/* Pie Chart Card */}
+        {/* Pie Chart Breakdown */}
         <Card className="lg:col-span-2 mt-4">
           <CardHeader>
             <CardTitle>
@@ -204,46 +241,66 @@ console.log(chartData);
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
-            {chartData.length > 0 ? (
+            {loadingTxns ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={chartData}
                     dataKey="value"
                     nameKey="name"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={5}
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={3}
                     label
+                    isAnimationActive={true}
+                    animationDuration={800}
+                    cx="50%"
+                    cy="50%"
                   >
-                    {chartData.map((entry, index) => (
+                    {chartData.map((entry) => (
                       <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
+                        key={entry.name}
+                        fill={COLORS[entry.name as keyof typeof COLORS] || "#999"}
                       />
                     ))}
+
                   </Pie>
+                  {/* Center total text */}
+                  <text
+                    x="50%"
+                    y="50%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="text-sm font-semibold fill-gray-700"
+                  >
+                    ৳{" "}
+                    {chartData
+                      .reduce((a, b) => a + b.value, 0)
+                      .toLocaleString()}
+                  </text>
                   <Tooltip
-                    formatter={(value: number) => `৳ ${value.toLocaleString()}`}
+                    formatter={(value) => `৳ ${value.toLocaleString()}`}
                   />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <p>No data to show.</p>
+              <p className="text-gray-500">No data to show.</p>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           {loadingTxns ? (
-  <Skeleton className="h-[300px] w-full" />
+            <Skeleton className="h-[300px] w-full" />
           ) : transactions.length === 0 ? (
             <p>No recent transactions.</p>
           ) : (
@@ -263,8 +320,19 @@ console.log(chartData);
                     <TableRow key={txn._id}>
                       <TableCell>{txn.transactionType}</TableCell>
                       <TableCell>৳ {txn.amount}</TableCell>
-                      <TableCell>{txn.fromUser?.name || "-"}</TableCell>
-                      <TableCell>{txn.toUser?.name || "-"}</TableCell>
+  <TableCell>
+   {txn.fromUser?.name ||
+    txn.fromAgent?.name ||
+    txn.initiatedByAgent?.name ||
+    "-"}
+ </TableCell>
+ <TableCell>
+   {txn.toUser?.name ||
+    txn.toAgent?.name ||
+    txn.initiatedByUser?.name ||
+    "-"}
+ </TableCell>
+
                       <TableCell>
                         {new Date(txn.createdAt).toLocaleString()}
                       </TableCell>
