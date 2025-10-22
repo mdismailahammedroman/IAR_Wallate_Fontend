@@ -31,26 +31,23 @@ import {
 } from "@/redux/features/wallet/wallet.api";
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import {
-  useGetAgentTransactionsQuery
+  useGetAgentTransactionsQuery,
 } from "@/redux/features/transaction/transaction.api";
 
 export function MyWalletInfo() {
   const navigate = useNavigate();
 
-  // Fetch wallet & balance
   const { data: walletResp, isLoading: loadingWallet } = useMyWalletQuery(
     undefined,
     { refetchOnMountOrArgChange: true }
   );
   const walletData = walletResp?.data;
 
-  // Fetch user info (role)
   const { data: userData } = useUserInfoQuery(undefined);
   const role = userData?.data?.role;
   const isUser = role === "USER";
   const isAgent = role === "AGENT";
 
-  // Always call both hooks, but use the appropriate one based on role
   const userQuery = useMyTransactionsQuery({
     limit: 5,
     page: 1,
@@ -61,73 +58,61 @@ export function MyWalletInfo() {
     page: 1,
   }, { skip: !isAgent });
 
-  // Use the appropriate query result based on role
   const { data: txnResp, isLoading: loadingTxns } = isAgent ? agentQuery : userQuery;
-  
-  const transactions = useMemo(() => {
-    return txnResp?.data?.transactions || [];
-  }, [txnResp?.data?.transactions]);
 
-  // Debug logging
-  console.log("🔍 MyWalletInfo Debug:");
-  console.log("Role:", role);
-  console.log("Is Agent:", isAgent);
-  console.log("User Query Data:", userQuery.data);
-  console.log("Agent Query Data:", agentQuery.data);
-  console.log("Selected Query Data:", txnResp);
-  console.log("Transactions:", transactions);
+  const transactions = useMemo(() => {
+    const raw = txnResp?.data;
+    return Array.isArray(raw)
+      ? raw
+      : raw?.transactions || [];
+  }, [txnResp?.data]);
 
   const {
-  totalAgentCashIn,
-  totalAgentCashOut,
-  totalUserSend,
-  totalUserAdd,
-  totalUserWithdraw,
-} = useMemo(() => {
-  let agentCashIn = 0;
-  let agentCashOut = 0;
-  let userSend = 0;
-  let userAdd = 0;
-  let userWithdraw = 0;
+    totalAgentCashIn,
+    totalAgentCashOut,
+    totalUserSend,
+    totalUserAdd,
+    totalUserWithdraw,
+  } = useMemo(() => {
+    let agentCashIn = 0;
+    let agentCashOut = 0;
+    let userSend = 0;
+    let userAdd = 0;
+    let userWithdraw = 0;
 
-  transactions.forEach((t) => {
-    const type = (t.transactionType || "").toUpperCase();
-    const amount = Number(t.amount) || 0;
+    transactions.forEach((t) => {
+      const type = (t.transactionType || "").toUpperCase();
+      const amount = Number(t.amount) || 0;
 
-    const isAgentTxn = !!t.initiatedByAgent || t.fromUser?.role === "AGENT" || t.toUser?.role === "AGENT";
-    const isUserTxn = !!t.initiatedByUser || t.fromUser?.role === "USER" || t.toUser?.role === "USER";
+      const isAgentTxn =
+        !!t.initiatedByAgent || !!t.fromAgent || !!t.toAgent;
 
-    // Agent perspective
-    if (isAgentTxn) {
-      if (type === "CASH_IN") agentCashIn += amount;
-      else if (type === "CASH_OUT") agentCashOut += amount;
-    }
+      const isUserTxn =
+        !!t.initiatedByUser || !!t.fromUser || !!t.toUser;
 
-    // User perspective
-    if (isUserTxn) {
-      if (type === "SEND") userSend += amount;
-      else if (type === "ADD" || type === "CASH_IN") userAdd += amount;
-      else if (type === "WITHDRAW" || type === "CASH_OUT") userWithdraw += amount;
-    }
-  });
+      // Agent perspective
+      if (isAgentTxn) {
+        if (type === "CASH_IN") agentCashIn += amount;
+        else if (type === "CASH_OUT") agentCashOut += amount;
+      }
 
-  return {
-    totalAgentCashIn: agentCashIn,
-    totalAgentCashOut: agentCashOut,
-    totalUserSend: userSend,
-    totalUserAdd: userAdd,
-    totalUserWithdraw: userWithdraw,
-  };
-}, [transactions]);
+      // User perspective
+      if (isUserTxn) {
+        if (type === "SEND") userSend += amount;
+        else if (type === "ADD" || type === "CASH_IN") userAdd += amount;
+        else if (type === "WITHDRAW" || type === "CASH_OUT") userWithdraw += amount;
+      }
+    });
 
+    return {
+      totalAgentCashIn: agentCashIn,
+      totalAgentCashOut: agentCashOut,
+      totalUserSend: userSend,
+      totalUserAdd: userAdd,
+      totalUserWithdraw: userWithdraw,
+    };
+  }, [transactions]);
 
-console.log("Transactions:", transactions);
-console.log("AgentCashIn:", totalAgentCashIn);
-console.log("AgentCashOut:", totalAgentCashOut);
-console.log("UserAdd:", totalUserAdd);
-console.log("UserWithdraw:", totalUserWithdraw);
-
-  // Chart data
   const chartData = useMemo(() => {
     if (isUser) {
       return [
@@ -142,10 +127,7 @@ console.log("UserWithdraw:", totalUserWithdraw);
         { name: "Cash Out", value: totalAgentCashOut },
       ];
     }
-    return [
-      { name: "Cash In", value: totalAgentCashIn },
-      { name: "Cash Out", value: totalAgentCashOut },
-    ];
+    return [];
   }, [
     isUser,
     isAgent,
@@ -156,23 +138,19 @@ console.log("UserWithdraw:", totalUserWithdraw);
     totalUserWithdraw,
   ]);
 
-  // Chart colors
   const COLORS = {
-    Send: "#3b82f6",      // blue
-    Add: "#4ade80",       // green
-    Withdraw: "#fbbf24",  // yellow
-    "Cash In": "#22c55e", // green
-    "Cash Out": "#fbbf24" // red
+    Send: "#3b82f6",
+    Add: "#4ade80",
+    Withdraw: "#fbbf24",
+    "Cash In": "#22c55e",
+    "Cash Out": "#f87171",
   };
-
 
   const balance = walletData?.balance ?? 0;
 
   return (
     <div className="space-y-8">
-      {/* Wallet Balance & Quick Actions */}
       <div className="grid dashboard-stats gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Wallet Balance */}
         <Card className="col-span-1 mt-4">
           <CardHeader>
             <CardTitle>Wallet Balance</CardTitle>
@@ -188,48 +166,26 @@ console.log("UserWithdraw:", totalUserWithdraw);
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
         <Card className="col-span-1 mt-4">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-4 flex-wrap">
-            {isUser && (
-              <>
-                <Button
-                  onClick={() => navigate("/user/transactions/cash-in")}
-                  className="w-[140px]"
-                >
-                  Cash In
-                </Button>
-                <Button
-                  onClick={() => navigate("/user/transactions/cash-out")}
-                  className="w-[140px]"
-                >
-                  Cash Out
-                </Button>
-              </>
-            )}
-            {isAgent && (
-              <>
-                <Button
-                  onClick={() => navigate("/user/transactions/cash-in")}
-                  className="w-[140px]"
-                >
-                  Cash In
-                </Button>
-                <Button
-                  onClick={() => navigate("/user/transactions/cash-out")}
-                  className="w-[140px]"
-                >
-                  Cash Out
-                </Button>
-              </>
-            )}
+            <Button
+              onClick={() => navigate("/user/transactions/cash-in")}
+              className="w-[140px]"
+            >
+              Cash In
+            </Button>
+            <Button
+              onClick={() => navigate("/user/transactions/cash-out")}
+              className="w-[140px]"
+            >
+              Cash Out
+            </Button>
           </CardContent>
         </Card>
 
-        {/* Pie Chart Breakdown */}
         <Card className="lg:col-span-2 mt-4">
           <CardHeader>
             <CardTitle>
@@ -254,10 +210,6 @@ console.log("UserWithdraw:", totalUserWithdraw);
                     outerRadius={90}
                     paddingAngle={3}
                     label
-                    isAnimationActive={true}
-                    animationDuration={800}
-                    cx="50%"
-                    cy="50%"
                   >
                     {chartData.map((entry) => (
                       <Cell
@@ -265,9 +217,7 @@ console.log("UserWithdraw:", totalUserWithdraw);
                         fill={COLORS[entry.name as keyof typeof COLORS] || "#999"}
                       />
                     ))}
-
                   </Pie>
-                  {/* Center total text */}
                   <text
                     x="50%"
                     y="50%"
@@ -293,7 +243,6 @@ console.log("UserWithdraw:", totalUserWithdraw);
         </Card>
       </div>
 
-      {/* Recent Transactions Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Transactions</CardTitle>
@@ -320,19 +269,18 @@ console.log("UserWithdraw:", totalUserWithdraw);
                     <TableRow key={txn._id}>
                       <TableCell>{txn.transactionType}</TableCell>
                       <TableCell>৳ {txn.amount}</TableCell>
-  <TableCell>
-   {txn.fromUser?.name ||
-    txn.fromAgent?.name ||
-    txn.initiatedByAgent?.name ||
-    "-"}
- </TableCell>
- <TableCell>
-   {txn.toUser?.name ||
-    txn.toAgent?.name ||
-    txn.initiatedByUser?.name ||
-    "-"}
- </TableCell>
-
+                      <TableCell>
+                        {txn.fromUser?.name ||
+                          txn.fromAgent?.name ||
+                          txn.initiatedByAgent?.name ||
+                          "-"}
+                      </TableCell>
+                      <TableCell>
+                        {txn.toUser?.name ||
+                          txn.toAgent?.name ||
+                          txn.initiatedByUser?.name ||
+                          "-"}
+                      </TableCell>
                       <TableCell>
                         {new Date(txn.createdAt).toLocaleString()}
                       </TableCell>

@@ -42,6 +42,7 @@ export const MyTransactionHistory = () => {
   const role = userInfo?.data?.role;
   const isAgent = role === "AGENT";
 
+
   // Call both hooks with skip flags to preserve hook order
   const userQuery = useMyTransactionsQuery(
     { limit, page, type, startDate, endDate },
@@ -87,6 +88,7 @@ export const MyTransactionHistory = () => {
       </Card>
     );
   }
+
 
   return (
     <Card>
@@ -153,29 +155,25 @@ export const MyTransactionHistory = () => {
                     <TableCell>{txn.transactionType}</TableCell>
                     <TableCell>{txn.amount}</TableCell>
                     <TableCell>
-                      {txn.fromUser?.name ||
-                        txn.fromAgent?.name ||
-                        txn.initiatedByUser?.name ||
-                        txn.initiatedByAgent?.name ||
-                        // Fallbacks when API returns plain IDs instead of populated objects
-                        (typeof txn.fromUser === "string" ? txn.fromUser : undefined) ||
-                        (typeof txn.fromAgent === "string" ? txn.fromAgent : undefined) ||
-                        (typeof txn.initiatedByUser === "string" ? txn.initiatedByUser : undefined) ||
-                        (typeof txn.initiatedByAgent === "string" ? txn.initiatedByAgent : undefined) ||
-                        "-"}
+                      {
+                        txn.fromUser && typeof txn.fromUser === "object" && txn.fromUser.name ? txn.fromUser.name :
+                          txn.fromAgent && typeof txn.fromAgent === "object" && txn.fromAgent.name ? txn.fromAgent.name :
+                            txn.initiatedByUser && typeof txn.initiatedByUser === "object" && txn.initiatedByUser.name ? txn.initiatedByUser.name :
+                              txn.initiatedByAgent && typeof txn.initiatedByAgent === "object" && txn.initiatedByAgent.name ? txn.initiatedByAgent.name :
+                                "-"
+                      }
                     </TableCell>
+
                     <TableCell>
-                      {txn.toUser?.name ||
-                        txn.toAgent?.name ||
-                        txn.initiatedByUser?.name ||
-                        txn.initiatedByAgent?.name ||
-                        // Fallbacks when API returns plain IDs instead of populated objects
-                        (typeof txn.toUser === "string" ? txn.toUser : undefined) ||
-                        (typeof txn.toAgent === "string" ? txn.toAgent : undefined) ||
-                        (typeof txn.initiatedByUser === "string" ? txn.initiatedByUser : undefined) ||
-                        (typeof txn.initiatedByAgent === "string" ? txn.initiatedByAgent : undefined) ||
-                        "-"}
+                      {
+                        txn.toUser && typeof txn.toUser === "object" && txn.toUser.name ? txn.toUser.name :
+                          txn.toAgent && typeof txn.toAgent === "object" && txn.toAgent.name ? txn.toAgent.name :
+                            txn.initiatedByUser && typeof txn.initiatedByUser === "object" && txn.initiatedByUser.name ? txn.initiatedByUser.name :
+                              txn.initiatedByAgent && typeof txn.initiatedByAgent === "object" && txn.initiatedByAgent.name ? txn.initiatedByAgent.name :
+                                "-"
+                      }
                     </TableCell>
+
                     <TableCell>
                       {new Date(txn.createdAt).toLocaleString()}
                     </TableCell>

@@ -9,9 +9,7 @@ export const UserProfile = () => {
 
 
   const user=userData?.data
-  console.log({ user, error, isLoading });
 
-  console.log(user);
   
 
   if (isLoading) {

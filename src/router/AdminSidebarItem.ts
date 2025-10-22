@@ -59,7 +59,7 @@ export const adminSidebarItems: ISidebarItem[] = [
     title: "Profile & Settings",
     items: [
       {
-        title: "My Wallet",
+        title: "My Profile",
         url: "me",
         component: UserProfile,
         icon: Wallet,

@@ -33,7 +33,6 @@ const TransactionAnalytics = () => {
     { limit: 1000 }, // Fetch more transactions for analytics
     { refetchOnMountOrArgChange: true }
   );
-console.log(response);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const transactions = Array.isArray(response?.data) ? response.data : [];
