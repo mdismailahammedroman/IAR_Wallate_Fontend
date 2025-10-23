@@ -53,6 +53,7 @@ export interface ITransactionListResponse {
 }
 
 
+
 export interface ICashInPayload {
   amount: number;
    userId: string;
@@ -67,33 +68,22 @@ export interface ITransaction {
   _id: string;
   transactionType: "SEND" | "WITHDRAW" | "ADD" | "CASH_IN" | "CASH_OUT";
   amount: number;
-  from: string;
-  to: string;
   createdAt: string;
   status: "PENDING" | "COMPLETED" | "FAILED";
-
-  initiatedByUser?: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-
-  initiatedByAgent?: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-
   fromUser?: IUser;
   toUser?: IUser;
   fromAgent?: IUser;
   toAgent?: IUser;
+  initiatedByUser?: IUser;
+  initiatedByAgent?: IUser;
+  transactionId?: string;
 }
+
 
 export interface IPaginatedResponse<T> {
   success: boolean;
   message?: string;
-  data: T[];
+data: T[]; 
   total: number;
   page: number;
   limit: number;

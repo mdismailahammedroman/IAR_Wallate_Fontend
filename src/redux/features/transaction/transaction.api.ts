@@ -11,7 +11,7 @@ import type {
   IWithdrawPayload,
   ITransaction,
   IPaginatedResponse,
-  ITransactionListResponse,
+  ITransactionListWrapper,
 } from "@/types/transaction.types";
 
 export const transactionApi = baseApi.injectEndpoints({
@@ -25,18 +25,18 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data,
       }),
-       invalidatesTags: ["Wallet"],
+      invalidatesTags: ["Wallet"],
     }),
-    addMoney: builder.mutation<IResponse<ITransactionResponse>, IAmountPayload>(
-      {
-        query: (data) => ({
-          url: "/transactions/add-money",
-          method: "POST",
-          data,
-        }),
-         invalidatesTags: ["Wallet"],
-      }
-    ),
+
+    addMoney: builder.mutation<IResponse<ITransactionResponse>, IAmountPayload>({
+      query: (data) => ({
+        url: "/transactions/add-money",
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: ["Wallet"],
+    }),
+
     withdrawMoney: builder.mutation<
       IResponse<ITransactionResponse>,
       IWithdrawPayload
@@ -46,89 +46,63 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data,
       }),
-       invalidatesTags: ["Wallet"],
+      invalidatesTags: ["Wallet"],
     }),
 
-    // ✅ NEW
+    // Cash-In and Cash-Out (for agents)
     cashIn: builder.mutation<IResponse<ITransactionResponse>, ICashInPayload>({
       query: (data) => ({
         url: "/transactions/cash-in",
         method: "POST",
         data,
       }),
-       invalidatesTags: ["Wallet"],
+      invalidatesTags: ["Wallet"],
     }),
-    cashOut: builder.mutation<IResponse<ITransactionResponse>, ICashOutPayload>(
-      {
-        query: (data) => ({
-          url: "/transactions/cash-out",
-          method: "POST",
-          data,
-        }),
-         invalidatesTags: ["Wallet"],
-      }
-    ),
-    // in transactionApi
-    getAllTransactions: builder.query<IPaginatedResponse<ITransaction>, any>({
 
+    cashOut: builder.mutation<IResponse<ITransactionResponse>, ICashOutPayload>({
+      query: (data) => ({
+        url: "/transactions/cash-out",
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: ["Wallet"],
+    }),
+
+    // Get all transactions (for admin, super admin)
+    getAllTransactions: builder.query<IPaginatedResponse<ITransaction>, any>({
       query: (params) => ({
         url: "/transactions/all-transactions",
         method: "GET",
         params,
       }),
     }),
-   
-    
-    // 👇 GET for User Transactions
-    getUserTransactions: builder.query<
-      IResponse<ITransactionListResponse>,
-      {
-        limit: number;
-        page: number;
-        type?: string;
-        startDate?: string;
-        endDate?: string;
-      }
-    >({
-      query: ({ limit, page, type, startDate, endDate }) => {
-        const params = new URLSearchParams();
-        params.append("limit", limit.toString());
-        params.append("page", page.toString());
-        if (type) params.append("type", type);
-        if (startDate) params.append("startDate", startDate);
-        if (endDate) params.append("endDate", endDate);
 
-        return {
-          url: `/transactions/user-transaction?${params.toString()}`,
-          method: "GET",
-        };
-      },
+   getMyTransactions: builder.query<ITransactionListWrapper, any>({
+  query: (params) => ({
+    url: "/transactions/my-transactions",
+    method: "GET",
+    params,
+  }),
+}),
+
+
+
+    // Fetch user-specific transactions (admin, super admin, user)
+    getUserTransactions: builder.query<IPaginatedResponse<ITransaction>, any>({
+      query: (params) => ({
+        url: "/transactions/user-transaction",  // Endpoint for user-specific transactions
+        method: "GET",
+        params,
+      }),
     }),
 
-    // 👇 GET for Agent Transactions
-    getAgentTransactions: builder.query<
-      IResponse<ITransactionListResponse>,
-      {
-        limit: number;
-        page: number;
-        type?: string;
-        startDate?: string;
-        endDate?: string;
-      }
-    >({
-      query: ({ limit, page, type, startDate, endDate }) => {
-        const params = new URLSearchParams();
-        params.append("limit", limit.toString());
-        params.append("page", page.toString());
-        if (type) params.append("type", type);
-        if (startDate) params.append("startDate", startDate);
-        if (endDate) params.append("endDate", endDate);
-
-        return {
-          url: `/transactions/agent-transaction?${params.toString()}`,
-          method: "GET",
-        };
-      },
+    // Fetch agent-specific transactions (admin, super admin, agent)
+    getAgentTransactions: builder.query<IPaginatedResponse<ITransaction>, any>({
+      query: (params) => ({
+        url: "/transactions/agent-transaction",  // Endpoint for agent-specific transactions
+        method: "GET",
+        params,
+      }),
     }),
   }),
 });
@@ -140,6 +114,7 @@ export const {
   useCashInMutation,
   useCashOutMutation,
   useGetAllTransactionsQuery,
-  useGetAgentTransactionsQuery,
-  useGetUserTransactionsQuery,
+  useGetMyTransactionsQuery,  // New hook for personal transactions
+  useGetUserTransactionsQuery, // User-specific transactions
+  useGetAgentTransactionsQuery, // Agent-specific transactions
 } = transactionApi;

@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
-import { useMyTransactionsQuery } from "@/redux/features/wallet/wallet.api";
-import { useGetAgentTransactionsQuery } from "@/redux/features/transaction/transaction.api";
-import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import {
+  useGetMyTransactionsQuery,
+} from "@/redux/features/transaction/transaction.api";
 import {
   Card,
   CardHeader,
@@ -28,39 +27,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const MyTransactionHistory = () => {
-  const [limit] = useState(100);
+  const [limit] = useState(10);
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Detect role
-  const { data: userInfo } = useUserInfoQuery(undefined);
-  const role = userInfo?.data?.role;
-  const isAgent = role === "AGENT";
 
+const { data, isLoading, refetch } = useGetMyTransactionsQuery({
+  limit,
+  page,
+  type,
+  startDate,
+  endDate,
+});
+console.log("API response:", data);
 
-  // Call both hooks with skip flags to preserve hook order
-  const userQuery = useMyTransactionsQuery(
-    { limit, page, type, startDate, endDate },
-    { skip: isAgent }
-  );
-  const agentQuery = useGetAgentTransactionsQuery(
-    { limit, page, type, startDate, endDate },
-    { skip: !isAgent }
-  );
+const transactions = data?.data?.data || [];
+const total = data?.data?.total || 0;
 
-  const selected = isAgent ? agentQuery : userQuery;
-  const { data, isLoading, refetch, error } = selected;
-
-  // Normalize response: agents may return an array; users return { transactions: [] }
-  const selectedRaw = data?.data as any;
-  const transactions = Array.isArray(selectedRaw)
-    ? selectedRaw
-    : (selectedRaw?.transactions || []);
+const totalPages = Math.ceil(total / limit);
 
   const handleFilter = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,27 +57,12 @@ export const MyTransactionHistory = () => {
     refetch();
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Spinner className="size-8" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Failed to load transactions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={() => refetch()}>Try Again</Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+      refetch();
+    }
+  };
 
   return (
     <Card>
@@ -97,7 +71,7 @@ export const MyTransactionHistory = () => {
       </CardHeader>
 
       <CardContent>
-        {/* ✅ Filter Form */}
+        {/* Filter Form */}
         <form
           onSubmit={handleFilter}
           className="flex flex-col md:flex-row md:flex-wrap gap-4 items-start md:items-center mb-6"
@@ -115,6 +89,7 @@ export const MyTransactionHistory = () => {
               <SelectItem value="WITHDRAW">Withdraw</SelectItem>
               <SelectItem value="CASH_IN">Cash In</SelectItem>
               <SelectItem value="CASH_OUT">Cash Out</SelectItem>
+              <SelectItem value="ADD">Add Money</SelectItem>
             </SelectContent>
           </Select>
 
@@ -136,58 +111,86 @@ export const MyTransactionHistory = () => {
           </Button>
         </form>
 
-        {/* ✅ Transaction Table */}
+        {/* Table */}
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.length > 0 ? (
-                transactions.map((txn: any) => (
-                  <TableRow key={txn._id}>
-                    <TableCell>{txn.transactionType}</TableCell>
-                    <TableCell>{txn.amount}</TableCell>
-                    <TableCell>
-                      {
-                        txn.fromUser && typeof txn.fromUser === "object" && txn.fromUser.name ? txn.fromUser.name :
-                          txn.fromAgent && typeof txn.fromAgent === "object" && txn.fromAgent.name ? txn.fromAgent.name :
-                            txn.initiatedByUser && typeof txn.initiatedByUser === "object" && txn.initiatedByUser.name ? txn.initiatedByUser.name :
-                              txn.initiatedByAgent && typeof txn.initiatedByAgent === "object" && txn.initiatedByAgent.name ? txn.initiatedByAgent.name :
-                                "-"
-                      }
-                    </TableCell>
-
-                    <TableCell>
-                      {
-                        txn.toUser && typeof txn.toUser === "object" && txn.toUser.name ? txn.toUser.name :
-                          txn.toAgent && typeof txn.toAgent === "object" && txn.toAgent.name ? txn.toAgent.name :
-                            txn.initiatedByUser && typeof txn.initiatedByUser === "object" && txn.initiatedByUser.name ? txn.initiatedByUser.name :
-                              txn.initiatedByAgent && typeof txn.initiatedByAgent === "object" && txn.initiatedByAgent.name ? txn.initiatedByAgent.name :
-                                "-"
-                      }
-                    </TableCell>
-
-                    <TableCell>
-                      {new Date(txn.createdAt).toLocaleString()}
+          {isLoading ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>From</TableHead>
+                  <TableHead>To</TableHead>
+                  <TableHead>Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(5)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>From</TableHead>
+                  <TableHead>To</TableHead>
+                  <TableHead>Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length > 0 ? (
+                  transactions.map((txn) => (
+                    <TableRow key={txn._id}>
+                      <TableCell>{txn.transactionType.replace("_", " ")}</TableCell>
+                      <TableCell>৳ {txn.amount}</TableCell>
+                      <TableCell>
+                        {txn.fromUser?.name || txn.fromAgent?.name || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {txn.toUser?.name || txn.toAgent?.name || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(txn.createdAt).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      No transactions found.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">
-                    No transactions found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-4">
+          <Button
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page <= 1}
+          >
+            Previous
+          </Button>
+          <span>{`Page ${page} of ${totalPages}`}</span>
+          <Button
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page >= totalPages}
+          >
+            Next
+          </Button>
         </div>
       </CardContent>
     </Card>

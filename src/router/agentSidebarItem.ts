@@ -16,7 +16,6 @@ import {
   History,
   Home,
   TrendingUp,
-  Shield
 } from "lucide-react";
 
 export const agentSidebarItems: ISidebarItem[] = [

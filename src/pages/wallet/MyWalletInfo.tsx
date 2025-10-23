@@ -30,9 +30,7 @@ import {
   useMyWalletQuery,
 } from "@/redux/features/wallet/wallet.api";
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
-import {
-  useGetAgentTransactionsQuery,
-} from "@/redux/features/transaction/transaction.api";
+
 
 export function MyWalletInfo() {
   const navigate = useNavigate();
@@ -43,29 +41,26 @@ export function MyWalletInfo() {
   );
   const walletData = walletResp?.data;
 
-  const { data: userData } = useUserInfoQuery(undefined);
-  const role = userData?.data?.role;
-  const isUser = role === "USER";
-  const isAgent = role === "AGENT";
+const { data: userData } = useUserInfoQuery(undefined);
+const role = userData?.data?.role;
+const isUser = role === "USER";
+const isAgent = role === "AGENT";
 
-  const userQuery = useMyTransactionsQuery({
-    limit: 5,
-    page: 1,
-  }, { skip: isAgent });
+const { data: txnResp, isLoading: loadingTxns } = useMyTransactionsQuery(
+  { limit: 5, page: 1 },
+  { skip: !isUser && !isAgent }
+);
 
-  const agentQuery = useGetAgentTransactionsQuery({
-    limit: 5,
-    page: 1,
-  }, { skip: !isAgent });
+const transactionss = txnResp?.data?.data?.data || [];
 
-  const { data: txnResp, isLoading: loadingTxns } = isAgent ? agentQuery : userQuery;
+console.log(transactionss);
 
-  const transactions = useMemo(() => {
-    const raw = txnResp?.data;
-    return Array.isArray(raw)
-      ? raw
-      : raw?.transactions || [];
-  }, [txnResp?.data]);
+const transactions = useMemo(() => {
+  return txnResp?.data?.data?.data || [];
+}, [txnResp?.data]);
+console.log("Raw txnResp:", txnResp);
+console.log("Extracted transactions:", transactions);
+
 
   const {
     totalAgentCashIn,
@@ -171,18 +166,45 @@ export function MyWalletInfo() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-4 flex-wrap">
-            <Button
-              onClick={() => navigate("/user/transactions/cash-in")}
-              className="w-[140px]"
-            >
-              Cash In
-            </Button>
-            <Button
-              onClick={() => navigate("/user/transactions/cash-out")}
-              className="w-[140px]"
-            >
-              Cash Out
-            </Button>
+            {isUser && (
+              <>
+                <Button
+                  onClick={() => navigate("/user/transactions/send-money")}
+                  className="w-[140px]"
+                >
+                  Send Money
+                </Button>
+                <Button
+                  onClick={() => navigate("/user/transactions/add-money")}
+                  className="w-[140px]"
+                >
+                  Add Money
+                </Button>
+                <Button
+                  onClick={() => navigate("/user/transactions/withdraw")}
+                  className="w-[140px]"
+                >
+                  Withdraw
+                </Button>
+              </>
+            )}
+
+            {isAgent && (
+              <>
+                <Button
+                  onClick={() => navigate("/user/transactions/cash-in")}
+                  className="w-[140px]"
+                >
+                  Cash In
+                </Button>
+                <Button
+                  onClick={() => navigate("/user/transactions/cash-out")}
+                  className="w-[140px]"
+                >
+                  Cash Out
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -192,8 +214,8 @@ export function MyWalletInfo() {
               {isUser
                 ? "User Transaction Breakdown"
                 : isAgent
-                  ? "Agent Transaction Breakdown"
-                  : "Transaction Breakdown"}
+                ? "Agent Transaction Breakdown"
+                : "Transaction Breakdown"}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
@@ -244,8 +266,17 @@ export function MyWalletInfo() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex justify-between items-center">
           <CardTitle>Recent Transactions</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              navigate(isAgent ? "/user/transactions/me" : "/user/transactions/me")
+            }
+          >
+            View All
+          </Button>
         </CardHeader>
         <CardContent>
           {loadingTxns ? (
@@ -269,12 +300,13 @@ export function MyWalletInfo() {
                     <TableRow key={txn._id}>
                       <TableCell>{txn.transactionType}</TableCell>
                       <TableCell>৳ {txn.amount}</TableCell>
-                      <TableCell>
-                        {txn.fromUser?.name ||
-                          txn.fromAgent?.name ||
-                          txn.initiatedByAgent?.name ||
-                          "-"}
-                      </TableCell>
+                     <TableCell>
+  {txn.fromUser?.name || txn.fromAgent?.name || txn.initiatedByUser?.name || txn.initiatedByAgent?.name || "-"}
+</TableCell>
+<TableCell>
+  {txn.toUser?.name || txn.toAgent?.name || "-"}
+</TableCell>
+
                       <TableCell>
                         {txn.toUser?.name ||
                           txn.toAgent?.name ||
