@@ -16,6 +16,14 @@
   border-radius: 4px;
 }
 
+.shepherd-element {
+  z-index: 9999 !important;
+}
+
+.shepherd-modal-overlay-container {
+  z-index: 9998 !important;
+}
+
 
 @custom-variant dark (&:is(.dark *));
 

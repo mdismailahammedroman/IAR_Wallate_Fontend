@@ -232,9 +232,9 @@ export default function Analytics() {
       </div>
 
       {/* Chart + Recent Transactions */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6 ">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6 dashboard-chart">
         {/* Revenue Chart */}
-        <Card className="col-span-3 dashboard-chart">
+        <Card className="col-span-3 ">
           <CardHeader>
             <CardTitle>Revenue Overview</CardTitle>
             <CardDescription>Monthly revenue trends for the past 6 months</CardDescription>
@@ -300,9 +300,9 @@ export default function Analytics() {
       </div>
 
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6 dashboard-top-users">
         {/* Top Users */}
-        <Card className="col-span-6 md:col-span-2 lg:col-span-3">
+        <Card className="col-span-6 md:col-span-2 lg:col-span-3 ">
           <CardHeader>
             <CardTitle>Top Users</CardTitle>
             <CardDescription>Users with the highest wallet balances</CardDescription>
@@ -343,7 +343,7 @@ export default function Analytics() {
         </Card>
 
         {/* Recent Transactions */}
-        <Card className="col-span-6 md:col-span-2 lg:col-span-3">
+        <Card className="col-span-6 md:col-span-2 lg:col-span-3 dashboard-transactions">
           <CardHeader>
             <CardTitle>Transactions</CardTitle>
             <CardDescription>
@@ -395,7 +395,7 @@ export default function Analytics() {
 
 
       {/* Quick Actions */}
-      <Card className="dashboard-quick-actions">
+      <Card className="dashboard-actionss">
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>Common administrative tasks</CardDescription>

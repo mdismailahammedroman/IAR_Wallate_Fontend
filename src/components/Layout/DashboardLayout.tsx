@@ -33,7 +33,7 @@ const DashboardLayout = () => {
 
   return (
     <SidebarProvider>
-      <AppSidebar items={sidebarItems} className="sidebar-nav" />
+      <AppSidebar items={sidebarItems}  />
 
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 justify-between">

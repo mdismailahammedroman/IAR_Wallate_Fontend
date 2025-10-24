@@ -21,7 +21,6 @@ import { useAppDispatch } from "@/redux/hook";
 import { role } from "@/constants/roles";
 import ModeToggle from "./mode.toggle";
 
-import Shepherd from "shepherd.js";
 
 const baseLinks = [
   { href: "/", label: "Home", role: "PUBLIC" },
@@ -63,82 +62,7 @@ export default function Navbar() {
   }, [userRole]);
 
   // ✅ Shepherd tour with all items
-  const startTour = () => {
-    const tour = new Shepherd.Tour({
-      defaultStepOptions: {
-        cancelIcon: { enabled: true },
-        classes: "shadow-md bg-indigo-600 text-white",
-        scrollTo: { behavior: "smooth", block: "center" },
-      },
-      useModalOverlay: true,
-    });
-
-    tour.addStep({
-      id: "mobile-menu",
-      text: "This is the mobile menu button.",
-      attachTo: { element: ".mobile-menu-toggle", on: "right" },
-      buttons: [{ text: "Next", action: tour.next }],
-    });
-
-    // Add steps for each nav item
-    filteredLinks.forEach((link, index) => {
-      tour.addStep({
-        id: `nav-${link.label.toLowerCase().replace(" ", "-")}`,
-        text: `This is the ${link.label} page.`,
-        attachTo: {
-          element: `.nav-link-${index}`,
-          on: "bottom",
-        },
-        buttons: [
-          ...(index > 0 ? [{ text: "Back", action: tour.back }] : []),
-          { text: "Next", action: tour.next },
-        ],
-      });
-    });
-
-    tour.addStep({
-      id: "theme-toggle",
-      text: "Click here to toggle dark/light mode.",
-      attachTo: {
-        element: ".mode-toggle",
-        on: "bottom",
-      },
-      buttons: [
-        { text: "Back", action: tour.back },
-        { text: "Next", action: tour.next },
-      ],
-    });
-
-    if (userEmail) {
-      tour.addStep({
-        id: "logout-button",
-        text: "Click here to log out of your account.",
-        attachTo: {
-          element: ".logout-btn",
-          on: "left",
-        },
-        buttons: [
-          { text: "Back", action: tour.back },
-          { text: "Finish", action: tour.complete },
-        ],
-      });
-    } else {
-      tour.addStep({
-        id: "login-button",
-        text: "Click here to log in or register.",
-        attachTo: {
-          element: ".login-btn",
-          on: "bottom",
-        },
-        buttons: [
-          { text: "Back", action: tour.back },
-          { text: "Finish", action: tour.complete },
-        ],
-      });
-    }
-
-    tour.start();
-  };
+ 
 
   return (
     <header className="sticky top-0 z-50 bg-indigo-700 dark:bg-gray-700 text-white dark:text-gray-200 shadow-md">
@@ -213,15 +137,6 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <ModeToggle className="mode-toggle" />
 
-          {userEmail && (
-            <Button
-              onClick={startTour}
-              variant="secondary"
-              className="text-sm"
-            >
-              Start Tour
-            </Button>
-          )}
 
           {userEmail ? (
             <Button

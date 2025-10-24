@@ -45,11 +45,17 @@ export interface ITransactionResponse {
   receiverNewBalance?: number;
 }
 
-// --- Paged Transaction API Response ---
 export interface ITransactionListResponse {
-  transactions: ITransaction[];
+  data: ITransaction[];
   total: number;
+  page: number;
   limit: number;
+}
+
+export interface ITransactionListWrapper {
+  success: boolean;
+  message?: string;
+  data: ITransactionListResponse;
 }
 
 

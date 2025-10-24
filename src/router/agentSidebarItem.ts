@@ -12,10 +12,8 @@ import {
   Key, 
   ArrowDownToLine, 
   ArrowUpFromLine, 
-  Wallet, 
   History,
   Home,
-  TrendingUp,
 } from "lucide-react";
 
 export const agentSidebarItems: ISidebarItem[] = [
@@ -25,15 +23,9 @@ export const agentSidebarItems: ISidebarItem[] = [
       {
         title: "Home",
         url: "/user/home",
-        component: UserProfile,
+        component: MyWalletInfo,
         icon: Home,
-      },
-      {
-        title: "Analytics",
-        url: "/user/analytics",
-        component: UserProfile,
-        icon: TrendingUp,
-      },
+      }
     ],
   },
   {
@@ -79,12 +71,7 @@ export const agentSidebarItems: ISidebarItem[] = [
   {
     title: "Wallet Management",
     items: [
-      {
-        title: "My Wallet",
-        url: "/user/wallets/me",
-        component: MyWalletInfo,
-        icon: Wallet,
-      },
+    
       {
         title: "Transaction History",
         url: "/user/transactions/me",

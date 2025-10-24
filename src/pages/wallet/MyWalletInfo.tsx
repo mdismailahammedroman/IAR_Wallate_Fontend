@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Card,
@@ -26,14 +26,18 @@ import {
 } from "recharts";
 
 import {
-  useMyTransactionsQuery,
   useMyWalletQuery,
 } from "@/redux/features/wallet/wallet.api";
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import { useGetMyTransactionsQuery } from "@/redux/features/transaction/transaction.api";
+import { useTour } from "@/hooks/useTour";
+import { getTourConfigByRole, hasSeenTour, markTourAsSeen } from "@/config/tours";
 
 
 export function MyWalletInfo() {
   const navigate = useNavigate();
+
+ 
 
   const { data: walletResp, isLoading: loadingWallet } = useMyWalletQuery(
     undefined,
@@ -41,25 +45,23 @@ export function MyWalletInfo() {
   );
   const walletData = walletResp?.data;
 
-const { data: userData } = useUserInfoQuery(undefined);
-const role = userData?.data?.role;
-const isUser = role === "USER";
-const isAgent = role === "AGENT";
+  const { data: userData } = useUserInfoQuery(undefined);
+  const role = userData?.data?.role;
+  const isUser = role === "USER";
+  const isAgent = role === "AGENT";
 
-const { data: txnResp, isLoading: loadingTxns } = useMyTransactionsQuery(
-  { limit: 5, page: 1 },
-  { skip: !isUser && !isAgent }
-);
+  const { data: txnResp, isLoading: loadingTxns } = useGetMyTransactionsQuery(
+    { limit: 5, page: 1 },
+    { refetchOnMountOrArgChange: true }
+  );
 
-const transactionss = txnResp?.data?.data?.data || [];
 
-console.log(transactionss);
 
-const transactions = useMemo(() => {
-  return txnResp?.data?.data?.data || [];
-}, [txnResp?.data]);
-console.log("Raw txnResp:", txnResp);
-console.log("Extracted transactions:", transactions);
+  const transactions = useMemo(() => {
+    return txnResp?.data?.data || [];
+  }, [txnResp?.data]);
+  console.log("Raw txnResp:", txnResp);
+  console.log("Extracted transactions:", transactions);
 
 
   const {
@@ -143,10 +145,26 @@ console.log("Extracted transactions:", transactions);
 
   const balance = walletData?.balance ?? 0;
 
+   const { startTour } = useTour();
+  const [tourStarted, setTourStarted] = useState(false);
+
+  useEffect(() => {
+    if (!userData?.data || tourStarted) return;
+
+    const tourConfig = getTourConfigByRole(role);
+    if (!hasSeenTour(tourConfig.storageKey)) {
+      startTour(tourConfig);
+      markTourAsSeen(tourConfig.storageKey);
+    }
+
+    setTourStarted(true);
+  }, [userData, role, startTour, tourStarted]);
+
+
   return (
-    <div className="space-y-8">
+<div className="space-y-8 mywallet-sidebar-nav">
       <div className="grid dashboard-stats gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="col-span-1 mt-4">
+        <Card className="col-span-1 mt-4 mywallet-wallet-balance-card">
           <CardHeader>
             <CardTitle>Wallet Balance</CardTitle>
           </CardHeader>
@@ -161,7 +179,7 @@ console.log("Extracted transactions:", transactions);
           </CardContent>
         </Card>
 
-        <Card className="col-span-1 mt-4">
+        <Card className="col-span-1 mt-4 mywallet-quick-actions-card">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
@@ -208,7 +226,7 @@ console.log("Extracted transactions:", transactions);
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 mt-4">
+        <Card className="lg:col-span-2 mt-4 mywallet-dashboard-transaction-breakdown">
           <CardHeader>
             <CardTitle>
               {isUser
@@ -252,9 +270,7 @@ console.log("Extracted transactions:", transactions);
                       .reduce((a, b) => a + b.value, 0)
                       .toLocaleString()}
                   </text>
-                  <Tooltip
-                    formatter={(value) => `৳ ${value.toLocaleString()}`}
-                  />
+                  <Tooltip formatter={(value) => `৳ ${value.toLocaleString()}`} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -265,15 +281,13 @@ console.log("Extracted transactions:", transactions);
         </Card>
       </div>
 
-      <Card>
+      <Card className="mywallet-recent-transactions">
         <CardHeader className="flex justify-between items-center">
           <CardTitle>Recent Transactions</CardTitle>
           <Button
             variant="outline"
             size="sm"
-            onClick={() =>
-              navigate(isAgent ? "/user/transactions/me" : "/user/transactions/me")
-            }
+            onClick={() => navigate("/user/transactions/me")}
           >
             View All
           </Button>
@@ -292,6 +306,7 @@ console.log("Extracted transactions:", transactions);
                     <TableHead>Amount</TableHead>
                     <TableHead>From</TableHead>
                     <TableHead>To</TableHead>
+                    <TableHead>Initiated By</TableHead>
                     <TableHead>Date</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -300,18 +315,14 @@ console.log("Extracted transactions:", transactions);
                     <TableRow key={txn._id}>
                       <TableCell>{txn.transactionType}</TableCell>
                       <TableCell>৳ {txn.amount}</TableCell>
-                     <TableCell>
-  {txn.fromUser?.name || txn.fromAgent?.name || txn.initiatedByUser?.name || txn.initiatedByAgent?.name || "-"}
-</TableCell>
-<TableCell>
-  {txn.toUser?.name || txn.toAgent?.name || "-"}
-</TableCell>
-
                       <TableCell>
-                        {txn.toUser?.name ||
-                          txn.toAgent?.name ||
-                          txn.initiatedByUser?.name ||
-                          "-"}
+                        {txn.fromUser?.name || txn.fromAgent?.name || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {txn.toUser?.name || txn.toAgent?.name || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {txn.initiatedByUser?.name || txn.initiatedByAgent?.name || "-"}
                       </TableCell>
                       <TableCell>
                         {new Date(txn.createdAt).toLocaleString()}
@@ -327,3 +338,4 @@ console.log("Extracted transactions:", transactions);
     </div>
   );
 }
+  

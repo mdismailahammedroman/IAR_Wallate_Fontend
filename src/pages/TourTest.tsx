@@ -109,7 +109,7 @@ export default function TourTest() {
               Test Admin Tour
             </Button>
             <Button 
-              onClick={() => startTour(tourConfigs.agentDashboard)}
+              onClick={() => startTour(tourConfigs.userDashboard)}
               variant="outline"
             >
               Test Agent Tour

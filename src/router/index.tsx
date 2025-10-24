@@ -51,7 +51,7 @@ const router = createBrowserRouter([
   Component: withAuth(DashboardLayout, [role.AGENT, role.USER]),
   path: "/user",
   children: [
-    { index: true, element: <Navigate to="/user/me" /> },
+    { index: true, element: <Navigate to="/user/home" /> },
    ...generateRoutes([...userSidebarItems, ...agentSidebarItems]),
   ],
 },

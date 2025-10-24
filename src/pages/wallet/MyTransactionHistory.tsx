@@ -37,14 +37,10 @@ export const MyTransactionHistory = () => {
   const [endDate, setEndDate] = useState("");
 
 
-const { data, isLoading, refetch } = useGetMyTransactionsQuery({
-  limit,
-  page,
-  type,
-  startDate,
-  endDate,
+const { data, isLoading, refetch } = useGetMyTransactionsQuery({ limit, page, type, startDate, endDate }, {
+  refetchOnMountOrArgChange: true ,
 });
-console.log("API response:", data);
+
 
 const transactions = data?.data?.data || [];
 const total = data?.data?.total || 0;
@@ -144,6 +140,8 @@ const totalPages = Math.ceil(total / limit);
                   <TableHead>Amount</TableHead>
                   <TableHead>From</TableHead>
                   <TableHead>To</TableHead>
+                      <TableHead>Initiated By</TableHead>
+
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -159,6 +157,9 @@ const totalPages = Math.ceil(total / limit);
                       <TableCell>
                         {txn.toUser?.name || txn.toAgent?.name || "-"}
                       </TableCell>
+                        <TableCell>
+    {txn.initiatedByUser?.name || txn.initiatedByAgent?.name || "-"} 
+  </TableCell>
                       <TableCell>
                         {new Date(txn.createdAt).toLocaleString()}
                       </TableCell>

@@ -1,4 +1,5 @@
 import TransactionPage from "@/pages/transaction/TransactionPage";
+import ChangePasswordForm from "@/pages/user/ChangePasswordForm";
 import { UserProfile } from "@/pages/user/UserProfile";
 import { UserUpdateForm } from "@/pages/user/UserUpdateForm";                     
 import { MyTransactionHistory } from "@/pages/wallet/MyTransactionHistory";
@@ -10,9 +11,9 @@ import {
   Send, 
   Plus, 
   Minus, 
-  Wallet, 
   History,
   Home,
+  Key,
 } from "lucide-react";
 
 export const userSidebarItems: ISidebarItem[] = [
@@ -22,7 +23,7 @@ export const userSidebarItems: ISidebarItem[] = [
       {
         title: "Home",
         url: "/user/home",
-        component: UserProfile,
+     component: MyWalletInfo,
         icon: Home,
       }
     ],
@@ -41,6 +42,12 @@ export const userSidebarItems: ISidebarItem[] = [
         url: "/user/update",
         component: UserUpdateForm,
         icon: Edit3,
+      },
+       {
+        title: "Change Password",
+        url: "/user/change-password",
+        component: ChangePasswordForm,
+        icon: Key,
       },
     ],
   },
@@ -68,14 +75,9 @@ export const userSidebarItems: ISidebarItem[] = [
     ],
   },
   {
-    title: "Wallet Info",
+    title: "Transaction Info",
     items: [
-      {
-        title: "My Wallet",
-        url: "/user/wallets/me",
-        component: MyWalletInfo,
-        icon: Wallet,
-      },
+     
       {
         title: "Transaction History",
         url: "/user/transactions/me",
