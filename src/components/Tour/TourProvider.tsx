@@ -1,20 +1,22 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import Shepherd from 'shepherd.js';
 
+type ShepherdTour = InstanceType<typeof Shepherd.Tour>;
+type ShepherdTourOptions = ConstructorParameters<typeof Shepherd.Tour>[0]; // inferred options type
+
 interface TourContextType {
-  createTour: (options?: Shepherd.Tour.TourOptions) => Shepherd.Tour;
-  startTour: (tour: Shepherd.Tour) => void;
-  stopTour: (tour: Shepherd.Tour) => void;
+  createTour: (options?: ShepherdTourOptions) => ShepherdTour;
+  startTour: (tour: ShepherdTour) => void;
+  stopTour: (tour: ShepherdTour) => void;
   resetTourStorage: (key: string) => void;
 }
 
 const TourContext = createContext<TourContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTour = () => {
   const context = useContext(TourContext);
-  if (!context) {
-    throw new Error('useTour must be used within a TourProvider');
-  }
+  if (!context) throw new Error('useTour must be used within a TourProvider');
   return context;
 };
 
@@ -23,12 +25,10 @@ interface TourProviderProps {
 }
 
 export const TourProvider = ({ children }: TourProviderProps) => {
-  const createTour = (options: Shepherd.Tour.TourOptions = {}) => {
-    const defaultOptions: Shepherd.Tour.TourOptions = {
+  const createTour = (options: ShepherdTourOptions = {}) => {
+    const defaultOptions: ShepherdTourOptions = {
       defaultStepOptions: {
-        cancelIcon: {
-          enabled: true,
-        },
+        cancelIcon: { enabled: true },
         classes: 'shadow-lg bg-indigo-600 text-white rounded-lg p-4',
         scrollTo: { behavior: 'smooth', block: 'center' },
       },
@@ -39,28 +39,11 @@ export const TourProvider = ({ children }: TourProviderProps) => {
     return new Shepherd.Tour(defaultOptions);
   };
 
-  const startTour = (tour: Shepherd.Tour) => {
-    tour.start();
-  };
+  const startTour = (tour: ShepherdTour) => tour.start();
+  const stopTour = (tour: ShepherdTour) => tour.cancel();
+  const resetTourStorage = (key: string) => localStorage.removeItem(key);
 
-  const stopTour = (tour: Shepherd.Tour) => {
-    tour.cancel();
-  };
+  const value: TourContextType = { createTour, startTour, stopTour, resetTourStorage };
 
-  const resetTourStorage = (key: string) => {
-    localStorage.removeItem(key);
-  };
-
-  const value: TourContextType = {
-    createTour,
-    startTour,
-    stopTour,
-    resetTourStorage,
-  };
-
-  return (
-    <TourContext.Provider value={value}>
-      {children}
-    </TourContext.Provider>
-  );
+  return <TourContext.Provider value={value}>{children}</TourContext.Provider>;
 };

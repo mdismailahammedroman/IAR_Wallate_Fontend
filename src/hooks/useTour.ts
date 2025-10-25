@@ -2,13 +2,12 @@
 import { useCallback, useMemo } from 'react';
 import { useTour as useTourContext } from '@/components/Tour/TourProvider';
 import { 
-  type TourConfig, 
+  tourConfigs, 
   getTourConfigByRole, 
   hasSeenTour, 
   markTourAsSeen, 
   resetTourStorage,
-
-  type TourStep
+  type TourConfig 
 } from '@/config/tours';
 
 interface UseTourOptions {
@@ -134,8 +133,9 @@ export const useTour = (options: UseTourOptions = {}) => {
     hasSeenTour: () => hasSeenTour(tourConfig.storageKey),
     shouldAutoStart,
     // Specific tour starters
+    startNavigationTour: () => startTourByConfig(tourConfigs.navigation),
     startDashboardTour: () => startTourByConfig(tourConfig),
-   
+
   };
 };
 
@@ -146,10 +146,10 @@ export const useNavigationTour = () => {
   
   return {
     startTour: () => {
-      if (hasSeenTour(TourConfig.navigation.storageKey)) return false;
+      if (hasSeenTour(tourConfigs.navigation.storageKey)) return false;
       
       tour.steps = [];
-      TourConfig.navigation.steps.forEach((step: TourStep, index: number) => {
+      tourConfigs.navigation.steps.forEach((step, index) => {
         const buttons = [];
         
         if (index > 0) {
@@ -159,7 +159,7 @@ export const useNavigationTour = () => {
           });
         }
         
-        if (index < TourConfig.navigation.steps.length - 1) {
+        if (index < tourConfigs.navigation.steps.length - 1) {
           buttons.push({
             text: 'Next',
             action: () => tour.next(),
@@ -169,7 +169,7 @@ export const useNavigationTour = () => {
             text: 'Finish',
             action: () => {
               tour.complete();
-              markTourAsSeen(TourConfig.navigation.storageKey);
+              markTourAsSeen(tourConfigs.navigation.storageKey);
             },
           });
         }
@@ -185,7 +185,7 @@ export const useNavigationTour = () => {
       tourContext.startTour(tour);
       return true;
     },
-    resetTour: () => resetTourStorage(TourConfig.navigation.storageKey),
+    resetTour: () => resetTourStorage(tourConfigs.navigation.storageKey),
   };
 };
 

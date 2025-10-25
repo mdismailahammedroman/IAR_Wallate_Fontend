@@ -1,9 +1,6 @@
 import { motion } from 'framer-motion';
-import Jane from '../../assets/about/Jane Smith.jpeg';
-import John from '../../assets/about/John Doe1.jpg';
-import Sara from '../../assets/about/Sara Lee.jpeg';
 
- const About = () => {
+const About = () => {
   return (
     <div className="max-w-7xl mx-auto py-12">
       {/* Service Story */}
@@ -67,7 +64,7 @@ import Sara from '../../assets/about/Sara Lee.jpeg';
             transition={{ duration: 0.8 }}
           >
             <img
-              src={John}
+              src="https://res.cloudinary.com/dfn1s2ysa/image/upload/v1761323380/wallet/hero/John_Doe1_lkk25b.jpg"
               alt="John Doe"
               className="w-32 h-32 rounded-full mx-auto mb-4"
             />
@@ -86,7 +83,7 @@ import Sara from '../../assets/about/Sara Lee.jpeg';
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <img
-              src={Jane}
+              src="https://res.cloudinary.com/dfn1s2ysa/image/upload/v1761323379/wallet/hero/Jane_Smith_fy3tgh.jpg"
               alt="Jane Smith"
               className="w-32 h-32 rounded-full mx-auto mb-4"
             />
@@ -105,7 +102,7 @@ import Sara from '../../assets/about/Sara Lee.jpeg';
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <img
-              src={Sara}
+              src="https://res.cloudinary.com/dfn1s2ysa/image/upload/v1761323379/wallet/hero/Sara_Lee_ihotno.jpg"
               alt="Sara Lee"
               className="w-32 h-32 rounded-full mx-auto mb-4"
             />
@@ -120,4 +117,5 @@ import Sara from '../../assets/about/Sara Lee.jpeg';
     </div>
   );
 };
-export default About
+
+export default About;

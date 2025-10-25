@@ -6,7 +6,7 @@ import { hasSeenTour, resetTourStorage } from '@/config/tours';
 import { tourConfigs } from '@/config/tours';
 
 export const TourDebug = () => {
-  const { startTour, restartTour, resetTour, hasSeenTour: checkHasSeenTour } = useTour();
+  const { startTour,  resetTour, hasSeenTour: checkHasSeenTour } = useTour();
 
   const tourStatuses = Object.values(tourConfigs).map(config => ({
     name: config.name,
@@ -72,7 +72,7 @@ export const TourDebug = () => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => startTour(tourConfigs.agentDashboard)}
+              onClick={() => startTour(tourConfigs.userDashboard)}
             >
               Start Agent Tour
             </Button>
