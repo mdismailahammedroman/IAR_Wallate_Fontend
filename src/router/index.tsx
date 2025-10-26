@@ -9,6 +9,7 @@ import { generateRoutes } from "@/utils/generateRoutes";
 import { userSidebarItems } from "./userSidebarItems";
 import { role } from "@/constants/roles";
 import { agentSidebarItems } from "./agentSidebarItem";
+import { Features } from "@/pages/home/Features";
 
 // Lazy-loaded components
 const App = lazy(() => import("@/App"));
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: "", element: <HomePage />},
       { path: "about", element: <About />},
       { path: "pricing", element: <Pricing />},
+      { path: "Features ", element: <Features />},
       { path: "contact", element: <Contact />},
       { path: "faq", element: <FAQ />},
     ],

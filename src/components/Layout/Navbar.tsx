@@ -25,6 +25,9 @@ import ModeToggle from "./mode.toggle";
 const baseLinks = [
   { href: "/", label: "Home", role: "PUBLIC" },
   { href: "/about", label: "About", role: "PUBLIC" },
+  { href: "/Features", label: "Features", role: "PUBLIC" },
+  { href: "/Pricing", label: "Pricing", role: "PUBLIC" },
+  { href: "/Contact", label: "Contact", role: "PUBLIC" },
   { href: "/faq", label: "FAQ", role: "PUBLIC" },
 ];
 

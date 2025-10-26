@@ -117,23 +117,30 @@ cd IAR_Wallate_Fontend
 git log --oneline --graph --decorate
 
 
-
+```
+### Credentials 
 ## Live link
-backend: https://iar-wallet-api.vercel.app/
-fontend:
+```
+backend: https://iar-wallet-api.vercel.app
+fontend: https://iar-wallet-font-end.vercel.app
+```
 ## github link
+
 backend: https://github.com/mdismailahammedroman/IAR-Wallate-Api
 fontend: https://github.com/mdismailahammedroman/IAR_Wallate_Fontend
 ### admin user agent email and pass
+```
+
 agen: falay55410@gta5hx.com
 agent: gelajov522@gamegta.com
-agent: sediyob192@hh7f.com
+agent: nebafe8613@hh7f.com
 
 user: leyev11429@gamegta.com
 user: gabit75261@fanlvr.com
 user: wicasi7191@hh7f.com
+user: cekali6558@haotuwu.com
 
 admin: superadmin@gmail.com
 admin: ismailahmmedroman2@gmail.com
 
-all-password-are-same: Ismail@123456
+all user -password-are-same: Ismail@123456
