@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import WalletImg1 from "../../assets/hero/1.png"
 import WalletImg2 from "@/assets/hero/2.jpeg"
 import WalletImg3 from "@/assets/hero/3.png"
+import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { Link } from "react-router"
 
 const walletImages = [WalletImg1, WalletImg2, WalletImg3]

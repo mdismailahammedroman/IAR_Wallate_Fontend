@@ -10,16 +10,19 @@ import ModeToggle from "./mode.toggle";
 import { Spinner } from "../ui/spinner";
 import { Button } from "../ui/button";
 import { useEffect } from "react";
-import { useDashboardTour } from "@/hooks/useTour";
+import { resetTour, restartTour, startTour } from "../Tour/tour";
 
 const DashboardLayout = () => {
   const { data, isLoading } = useUserInfoQuery();
   const role = data?.data?.role || "PUBLIC";
-  const { startTour, restartTour, resetTour } = useDashboardTour({ role });
 
-  useEffect(() => {
-    startTour();
-  }, [startTour, role]);
+    useEffect(() => {
+    if (!role) return; // wait until role is loaded
+    const tourCompleted = localStorage.getItem(`tourCompleted-${role}`);
+    if (!tourCompleted) {
+      startTour(role);
+    }
+  }, [role]);
 
   if (isLoading) {
     return (
@@ -33,30 +36,33 @@ const DashboardLayout = () => {
 
   return (
     <SidebarProvider>
-      <AppSidebar items={sidebarItems}  />
+      <AppSidebar items={sidebarItems} />
 
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 justify-between">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <ModeToggle className="mode-toggle" />
-            <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
           </div>
 
           <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => restartTour()} 
+            <Button
+              size="sm"
+              variant="outline"
               className="text-sm"
+              onClick={() => restartTour(role)}
             >
               Restart Tour
             </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              onClick={() => resetTour()} 
+            <Button
+              size="sm"
+              variant="ghost"
               className="text-sm"
+              onClick={() => resetTour(role)}
             >
               Reset Tour
             </Button>

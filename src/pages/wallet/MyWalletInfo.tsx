@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Card,
@@ -30,8 +29,7 @@ import {
 } from "@/redux/features/wallet/wallet.api";
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import { useGetMyTransactionsQuery } from "@/redux/features/transaction/transaction.api";
-import { useTour } from "@/hooks/useTour";
-import { getTourConfigByRole, hasSeenTour, markTourAsSeen } from "@/config/tours";
+import { useMemo } from "react";
 
 
 export function MyWalletInfo() {
@@ -145,20 +143,7 @@ export function MyWalletInfo() {
 
   const balance = walletData?.balance ?? 0;
 
-   const { startTour } = useTour();
-  const [tourStarted, setTourStarted] = useState(false);
 
-  useEffect(() => {
-    if (!userData?.data || tourStarted) return;
-
-    const tourConfig = getTourConfigByRole(role);
-    if (!hasSeenTour(tourConfig.storageKey)) {
-      startTour(tourConfig);
-      markTourAsSeen(tourConfig.storageKey);
-    }
-
-    setTourStarted(true);
-  }, [userData, role, startTour, tourStarted]);
 
 
   return (
